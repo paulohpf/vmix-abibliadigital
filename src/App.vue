@@ -5,8 +5,6 @@
         <component :is="layout">
           <router-view />
         </component>
-        <!-- <v-img alt="Vue logo" :src="require('@/assets/logo.png')" />
-        <HelloWorld msg="Welcome to Your Vue.js App testeeee" /> -->
       </VApp>
     </VMain>
   </div>
@@ -17,9 +15,7 @@ const defaultLayout = 'Default';
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld: () => import('@/components/HelloWorld.vue'),
-  },
+  components: {},
   computed: {
     layout() {
       return `${this.$route.meta.layout || defaultLayout}Layout`;
@@ -34,13 +30,10 @@ export default {
 };
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="sass">
+@import '@/styles/style'
+
+#app
+  font-family: 'Roboto', sans-serif
+  height: 100%
 </style>

@@ -1,9 +1,7 @@
 <template>
-  <div>
-    <v-container fluid ma-0 pa-0>
-      <slot />
-    </v-container>
-  </div>
+  <v-container fluid ma-0 pa-0 fill-height>
+    <slot />
+  </v-container>
 </template>
 
 <script>
