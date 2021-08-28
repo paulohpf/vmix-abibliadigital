@@ -1,7 +1,7 @@
 <template>
-  <v-container fluid ma-0 pa-0 fill-height>
+  <v-card class="default-layout">
     <slot />
-  </v-container>
+  </v-card>
 </template>
 
 <script>
@@ -10,4 +10,7 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.default-layout
+  min-height: 100vh
+</style>

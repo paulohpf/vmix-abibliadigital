@@ -11,7 +11,7 @@ const routes = [
       // backgroundImage: require('@/assets/images/landing/banner.jpg'),
       // layout: 'home',
     },
-    component: () => import('@/views/Login.vue'),
+    component: () => import('@/views/Home.vue'),
   },
 ];
 
