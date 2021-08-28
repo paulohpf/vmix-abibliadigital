@@ -15,7 +15,10 @@
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.16.3",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-router": "^3.5.2",
+    "vuetify": "^2.5.8",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
@@ -23,15 +26,18 @@
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
+    "@vue/eslint-config-airbnb": "^5.3.0",
+    "deepmerge": "^4.2.2",
     "electron": "^13.2.3",
     "electron-devtools-installer": "^3.1.0",
     "eslint": "^7.32.0",
-    "@vue/eslint-config-airbnb": "^5.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-prettier": "^3.4.1",
     "eslint-plugin-vue": "^7.17.0",
     "prettier": "^2.3.2",
+    "sass": "^1.32.13",
+    "sass-loader": "^12.1.0",
     "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-template-compiler": "^2.6.11"
   },

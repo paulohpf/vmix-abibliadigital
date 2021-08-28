@@ -1,17 +1,36 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App testeeee" />
+    <VMain>
+      <VApp>
+        <component :is="layout">
+          <router-view />
+        </component>
+        <v-img alt="Vue logo" :src="require('@/assets/logo.png')" />
+        <HelloWorld msg="Welcome to Your Vue.js App testeeee" />
+      </VApp>
+    </VMain>
   </div>
 </template>
 
 <script>
+const defaultLayout = 'default';
+
 export default {
   name: 'App',
   components: {
     HelloWorld: () => import('@/components/HelloWorld.vue'),
   },
-  mounted() {},
+  computed: {
+    layout() {
+      return `${this.$route.meta.layout || defaultLayout}-layout`;
+    },
+    bgImage() {
+      return this.$route.meta.backgroundImage;
+    },
+    loader() {
+      return this.$store.getters.loaderActive;
+    },
+  },
 };
 </script>
 
