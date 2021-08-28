@@ -5,15 +5,15 @@
         <component :is="layout">
           <router-view />
         </component>
-        <v-img alt="Vue logo" :src="require('@/assets/logo.png')" />
-        <HelloWorld msg="Welcome to Your Vue.js App testeeee" />
+        <!-- <v-img alt="Vue logo" :src="require('@/assets/logo.png')" />
+        <HelloWorld msg="Welcome to Your Vue.js App testeeee" /> -->
       </VApp>
     </VMain>
   </div>
 </template>
 
 <script>
-const defaultLayout = 'default';
+const defaultLayout = 'Default';
 
 export default {
   name: 'App',
@@ -22,7 +22,7 @@ export default {
   },
   computed: {
     layout() {
-      return `${this.$route.meta.layout || defaultLayout}-layout`;
+      return `${this.$route.meta.layout || defaultLayout}Layout`;
     },
     bgImage() {
       return this.$route.meta.backgroundImage;
