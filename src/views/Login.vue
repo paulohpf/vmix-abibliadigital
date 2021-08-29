@@ -38,6 +38,7 @@
 
 <script>
 import { mdiEye, mdiEyeOff } from '@mdi/js';
+// import {abibliadigital as aBibliaDigitalAPI} from '@/providers/abibliadigital';
 
 export default {
   name: 'Login',
@@ -67,6 +68,7 @@ export default {
   methods: {
     submit() {
       console.log('.');
+      // aBibliaDigitalAPI.get(`/verses/${this.inputs.}/:abbrev/:chapter`)
       const validate = this.$refs.loginForm.validate();
       if (validate) console.log(this.inputs);
     },

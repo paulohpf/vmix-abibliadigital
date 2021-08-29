@@ -2,6 +2,7 @@
   <div id="app">
     <VMain>
       <VApp>
+        <Loader v-show="loader" />
         <component :is="layout">
           <router-view />
         </component>
@@ -15,7 +16,7 @@ const defaultLayout = 'Default';
 
 export default {
   name: 'App',
-  components: {},
+  components: { Loader: () => import('@/components/Loader.vue') },
   computed: {
     layout() {
       return `${this.$route.meta.layout || defaultLayout}Layout`;

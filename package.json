@@ -20,7 +20,8 @@
     "vue": "^2.6.11",
     "vue-router": "^3.5.2",
     "vuetify": "^2.5.8",
-    "vuex": "^3.6.2"
+    "vuex": "^3.6.2",
+    "vuex-persistedstate": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
