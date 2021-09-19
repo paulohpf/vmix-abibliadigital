@@ -17,9 +17,15 @@ class BibliaDigitalProvider {
   }
 
   getVersions() {
-    return abibliadigital.get(`versions`, {
-      // Authorization:
-    });
+    return abibliadigital.get(`versions`, {});
+  }
+
+  getBooks() {
+    return abibliadigital.get(`books`, {});
+  }
+
+  getChapter(version, abbrev, chapter) {
+    return abibliadigital.get(`verses/${version}/${abbrev}/${chapter}`, {});
   }
 }
 

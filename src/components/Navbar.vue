@@ -25,7 +25,7 @@
             name="name"
             label="Livro"
             :items="books"
-            item-value="name"
+            item-value="abbrev.pt"
             item-text="name"
             autocomplete="off"
             return-object
@@ -126,17 +126,27 @@ export default {
       return chapters;
     },
   },
+  // updated() {
+  //   console.log(this);
+  // },
   methods: {
     toUpper(text) {
       return String(text.version).toUpperCase();
     },
     async getChapter() {
       if (this.inputs.version && this.inputs.book && this.inputs.chapter) {
-        const res = await BibliaDigitalProvider.getVersions();
-        // const res = await BibliaDigitalProvider.get(
+        await BibliaDigitalProvider.getChapter(
+          this.inputs.version,
+          this.inputs.book.abbrev.pt,
+          this.inputs.chapter,
+        ).then(res => {
+          console.log(res);
+          this.$store.commit('setChapter', res.data);
+        });
+        // await BibliaDigitalProvider.getChapter(
         //   `/verses/${this.inputs.version}/${this.inputs.book.abbrev.pt}/${this.inputs.chapter}`,
         // );
-        console.log(res);
+        // console.log(res);
       }
     },
   },

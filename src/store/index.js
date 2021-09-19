@@ -16,7 +16,7 @@ export default new Vuex.Store({
   },
   plugins: [
     createPersistedState({
-      paths: ['persistedData.aBibliaDigital'],
+      paths: ['persistedData.aBibliaDigital', 'bible'],
     }),
   ],
 });

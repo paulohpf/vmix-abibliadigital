@@ -758,9 +758,19 @@ export default {
         testament: 'NT',
       },
     ],
-    chapters: [],
+    chapter: [],
   },
-  mutations: {},
+  mutations: {
+    setBooks(state, books) {
+      state.books = books;
+    },
+    setVersions(state, versions) {
+      state.versions = versions;
+    },
+    setChapter(state, chapter) {
+      state.chapter = chapter;
+    },
+  },
   getters: {
     getVersions(state) {
       return state.versions;
@@ -768,8 +778,8 @@ export default {
     getBooks(state) {
       return state.books;
     },
-    getChapters(state) {
-      return state.chapters;
+    getChapter(state) {
+      return state.chapter;
     },
   },
 };

@@ -24,8 +24,10 @@
 
       <v-list three-line subheader>
         <v-subheader
-          >Usuário A Biblia Digital -
-          {{ bibleUser.token ? 'Conectado' : 'Desconectado' }}
+          >Usuário API Biblia Digital -
+          {{
+            bibleUser.token ? `Conectado - ${bibleUser.name}` : 'Desconectado'
+          }}
         </v-subheader>
 
         <v-list-item-group multiple>
@@ -115,7 +117,12 @@ export default {
     },
   },
   updated() {
-    console.log(this);
+    // console.log(this);
+  },
+  mounted() {
+    if (this.bibleUser) {
+      this.bibliaDigitalUserData.email = this.bibleUser.email;
+    }
   },
   methods: {
     async saveUserABibliaDigital() {
@@ -124,12 +131,23 @@ export default {
         this.bibliaDigitalUserData.email &&
         this.bibliaDigitalUserData.password
       ) {
-        const res = await BibliaDigitalProvider.updateToken({
+        await BibliaDigitalProvider.updateToken({
           email: this.bibliaDigitalUserData.email,
           password: this.bibliaDigitalUserData.password,
+        }).then(res => {
+          if (res.data.msg === 'User not found') {
+            return;
+          }
+
+          this.$store.commit('setBibliaDigitalUserData', res.data);
         });
 
-        this.$store.commit('setBibliaDigitalUserData', res.data);
+        await BibliaDigitalProvider.getVersions().then(res => {
+          this.$store.commit('setVersions', res.data);
+        });
+        await BibliaDigitalProvider.getBooks().then(res => {
+          this.$store.commit('setBooks', res.data);
+        });
       }
     },
   },
