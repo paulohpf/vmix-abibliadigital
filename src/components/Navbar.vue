@@ -42,9 +42,11 @@
         </v-col>
         <v-col>
           <v-text-field
-            hint="Exemplo: 1:1-2"
-            label="Referência"
+            v-model="inputs.verses"
+            hint="Exemplo: 1-2"
+            label="Versiculos"
             autocomplete="off"
+            :rules="inputs.rules.verses"
           />
         </v-col>
       </v-row>
@@ -107,6 +109,15 @@ export default {
       version: '',
       book: '',
       chapter: '',
+      verses: '',
+      rules: {
+        verses: [
+          v => {
+            const arr = String(v).split('-');
+            return arr[0] < arr[1] ? 'Versiculo inicial maior que final' : true;
+          },
+        ],
+      },
     },
   }),
   computed: {
@@ -140,13 +151,19 @@ export default {
           this.inputs.book.abbrev.pt,
           this.inputs.chapter,
         ).then(res => {
-          console.log(res);
-          this.$store.commit('setChapter', res.data);
+          const { data } = res;
+
+          if (this.inputs.verses) {
+            const verses = String(this.inputs.verses).split('-');
+
+            data.verses = data.verses.filter(
+              (verse, index) =>
+                index >= verses[0] - 1 && index <= verses[1] - 1,
+            );
+          }
+
+          this.$store.commit('setChapter', data);
         });
-        // await BibliaDigitalProvider.getChapter(
-        //   `/verses/${this.inputs.version}/${this.inputs.book.abbrev.pt}/${this.inputs.chapter}`,
-        // );
-        // console.log(res);
       }
     },
   },

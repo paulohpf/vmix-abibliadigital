@@ -26,7 +26,12 @@ module.exports = {
       process.env.NODE_ENV === 'production'
         ? ['warn', { allow: ['error', 'warn'] }]
         : 'off',
-    'prettier/prettier': 'error',
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
     'vue/no-unused-vars': 'error',
   },
 };
