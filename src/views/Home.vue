@@ -6,11 +6,12 @@
       class="overflow-y-auto"
       style="max-height: calc(100vh - 80px)"
     >
-      {this.store.getters.getChapter}
       <v-data-table
         v-model="bibleTable.selected"
         :headers="bibleTable.headers"
-        :items="chapter.verses"
+        :items="verses"
+        :single-select="bibleTable.singleSelect"
+        item-key="number"
         show-select
       />
     </div>
@@ -41,9 +42,9 @@ export default {
     },
   }),
   computed: {
-    chapter() {
+    verses() {
       if (this.$store.getters.getChapter.verses) {
-        return this.$store.getters.getChapter;
+        return this.$store.getters.getChapter?.verses;
       }
       return [];
     },
