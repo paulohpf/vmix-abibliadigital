@@ -53,6 +53,7 @@ export default {
   },
   updated() {
     console.log(this);
+    window.myAPI.saveBibleJson(this.bibleTable.selected);
     // ipcRenderer.send('save-bible-json', 'ping');
   },
   methods: {},

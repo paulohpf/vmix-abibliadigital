@@ -1,5 +1,7 @@
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('myAPI', {
-  desktop: true,
+  saveBibleJson: data => {
+    ipcRenderer.send('save-bible-json', data);
+  },
 });

@@ -37,9 +37,6 @@ async function createWindow() {
     // Load the index.html when not in development
     mainWin.loadURL('app://./index.html');
   }
-  contextBridge.exposeInMainWorld('myAPI', {
-    desktop: true,
-  });
 
   ipcMain.on('save-bible-json', ElectronProvider.handleSaveBibleJSON);
 }
