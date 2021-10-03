@@ -21,7 +21,8 @@
     "vue-router": "^3.5.2",
     "vuetify": "^2.5.8",
     "vuex": "^3.6.2",
-    "vuex-persistedstate": "^4.0.0"
+    "vuex-persistedstate": "^4.0.0",
+    "electron": "^13.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",
@@ -32,7 +33,6 @@
     "@vue/cli-service": "~4.5.0",
     "@vue/eslint-config-airbnb": "^5.3.0",
     "deepmerge": "^4.2.2",
-    "electron": "^13.4.0",
     "electron-devtools-installer": "^3.1.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",

@@ -19,6 +19,8 @@
 </template>
 
 <script>
+// import { contextBridge } from 'electron';
+
 export default {
   components: {
     Navbar: () => import('@/components/Navbar.vue'),
@@ -51,6 +53,7 @@ export default {
   },
   updated() {
     console.log(this);
+    // ipcRenderer.send('save-bible-json', 'ping');
   },
   methods: {},
 };
