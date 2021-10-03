@@ -6,7 +6,6 @@
       elevate-on-scroll
       scroll-target="#versescontainer"
     >
-      <!-- <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon> -->
       <v-row>
         <v-col>
           <v-autocomplete
@@ -55,42 +54,19 @@
         <v-icon>{{ icons.mdiMagnify }}</v-icon>
       </v-btn>
 
-      <!-- <v-btn icon>
-        <v-icon>{{ icons.mdiFilter }}</v-icon>
-      </v-btn> -->
+      <v-btn icon @click="() => addToList()">
+        <v-icon>{{ icons.mdiPlusBox }}</v-icon>
+      </v-btn>
 
       <Settings>
         <v-icon>{{ icons.mdiTools }}</v-icon>
       </Settings>
-      <!-- <v-btn icon> </v-btn> -->
-
-      <!-- <v-menu left bottom>
-        <template #activator="{ on, attrs }">
-          <v-btn icon v-bind="attrs" v-on="on">
-            <v-icon>{{ icons.mdiDotsVertical }}</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list>
-          <v-list-item @click="() => {}">
-            <v-list-item-title>Configurações</v-list-item-title>
-          </v-list-item>
-          <v-list-item v-for="n in 5" :key="n" @click="() => {}">
-            <v-list-item-title>Option {{ n }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu> -->
     </v-app-bar>
   </nav>
 </template>
 
 <script>
-import {
-  mdiMagnify,
-  mdiFilter,
-  // mdiDotsVertical,
-  mdiTools,
-} from '@mdi/js';
+import { mdiMagnify, mdiFilter, mdiTools, mdiPlusBox } from '@mdi/js';
 import BibliaDigitalProvider from '@/providers/abibliadigital';
 
 export default {
@@ -102,8 +78,8 @@ export default {
     icons: {
       mdiMagnify,
       mdiFilter,
-      // mdiDotsVertical,
       mdiTools,
+      mdiPlusBox,
     },
     inputs: {
       version: '',
@@ -114,7 +90,8 @@ export default {
         verses: [
           v => {
             const arr = String(v).split('-');
-            return arr[0] < arr[1] ? 'Versiculo inicial maior que final' : true;
+            console.log(arr[0], arr[1]);
+            return arr[0] > arr[1] ? 'Versiculo inicial maior que final' : true;
           },
         ],
       },
@@ -165,6 +142,28 @@ export default {
           this.$store.commit('setChapter', data);
         });
       }
+    },
+    async addToList() {
+      await this.getChapter();
+
+      this.$store.commit('setChapterList', {
+        name: `${String(this.inputs.version).toUpperCase()} - ${
+          this.inputs.book.name
+        } ${this.inputs.chapter} : ${this.inputs.verses}`,
+        version: this.inputs.version,
+        book: this.inputs.book,
+        chapter: this.inputs.chapter,
+        verses: this.inputs.verses,
+        versesArr: this.$store.getters.getChapter,
+      });
+      // if (this.inputs.version && this.inputs.book && this.inputs.chapter) {
+      //   console.log({
+      //     version: this.inputs.version,
+      //     book: this.inputs.book,
+      //     chapter: this.inputs.chapter,
+      //     verses: this.inputs.verses,
+      //   });
+      // }
     },
   },
 };

@@ -1,33 +1,52 @@
 <template>
   <div class="home">
     <Navbar />
-    <div
+    <v-row
       id="versescontainer"
       class="overflow-y-auto"
       style="max-height: calc(100vh - 80px)"
     >
-      <v-data-table
-        v-model="bibleTable.selected"
-        :headers="bibleTable.headers"
-        :items="verses"
-        :single-select="bibleTable.singleSelect"
-        item-key="number"
-        show-select
-      />
-    </div>
+      <v-col :cols="bibleTable.showList ? 8 : 12">
+        <v-btn icon @click="() => (bibleTable.showList = !bibleTable.showList)">
+          <v-icon>{{
+            bibleTable.showList ? icons.mdiViewList : icons.mdiViewListOutline
+          }}</v-icon>
+        </v-btn>
+        <v-data-table
+          v-model="bibleTable.selected"
+          :headers="bibleTable.headers"
+          :items="verses"
+          :single-select="bibleTable.singleSelect"
+          item-key="number"
+          show-select
+        />
+      </v-col>
+      <v-col v-if="bibleTable.showList" cols="4">
+        <v-data-table
+          :headers="chapterListTable.headers"
+          :items="chapterList"
+        />
+      </v-col>
+    </v-row>
+    <div></div>
   </div>
 </template>
 
 <script>
-// import { contextBridge } from 'electron';
+import { mdiViewList, mdiViewListOutline } from '@mdi/js';
 
 export default {
   components: {
     Navbar: () => import('@/components/Navbar.vue'),
   },
   data: () => ({
+    icons: {
+      mdiViewList,
+      mdiViewListOutline,
+    },
     bibleTable: {
       singleSelect: false,
+      showList: false,
       headers: [
         {
           text: 'Capitulo',
@@ -42,6 +61,20 @@ export default {
       ],
       selected: [],
     },
+    chapterListTable: {
+      headers: [
+        {
+          text: 'Versiculo',
+          align: 'start',
+          value: 'name',
+        },
+        {
+          text: 'Ativo',
+          align: 'start',
+          value: '',
+        },
+      ],
+    },
   }),
   computed: {
     verses() {
@@ -50,11 +83,16 @@ export default {
       }
       return [];
     },
+    chapterList() {
+      if (this.$store.getters.getChapterList) {
+        return this.$store.getters.getChapterList;
+      }
+      return [];
+    },
   },
   updated() {
     console.log(this);
-    window.myAPI.saveBibleJson(this.bibleTable.selected);
-    // ipcRenderer.send('save-bible-json', 'ping');
+    // window.myAPI.saveBibleJson(this.bibleTable.selected);
   },
   methods: {},
 };

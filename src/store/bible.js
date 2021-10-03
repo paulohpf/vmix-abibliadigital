@@ -759,6 +759,7 @@ export default {
       },
     ],
     chapter: [],
+    chapterList: [],
   },
   mutations: {
     setBooks(state, books) {
@@ -770,6 +771,12 @@ export default {
     setChapter(state, chapter) {
       state.chapter = chapter;
     },
+    setChapterList(state, chapter) {
+      const { chapterList } = state;
+
+      chapterList.push(chapter);
+      state.chapterList = chapterList;
+    },
   },
   getters: {
     getVersions(state) {
@@ -780,6 +787,9 @@ export default {
     },
     getChapter(state) {
       return state.chapter;
+    },
+    getChapterList(state) {
+      return state.chapterList;
     },
   },
 };
