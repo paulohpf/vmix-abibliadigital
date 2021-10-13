@@ -90,8 +90,10 @@ export default {
         verses: [
           v => {
             const arr = String(v).split('-');
-            console.log(arr[0], arr[1]);
-            return arr[0] > arr[1] ? 'Versiculo inicial maior que final' : true;
+
+            return Number(String(arr[0]).trim()) > Number(String(arr[1]).trim())
+              ? 'Versiculo inicial maior que final'
+              : true;
           },
         ],
       },
@@ -133,10 +135,12 @@ export default {
           if (this.inputs.verses) {
             const verses = String(this.inputs.verses).split('-');
 
-            data.verses = data.verses.filter(
-              (verse, index) =>
-                index >= verses[0] - 1 && index <= verses[1] - 1,
-            );
+            data.verses = data.verses.filter(verse => {
+              return verse.number <= Number(String(verses[1]).trim())
+                ? verse.number >= Number(String(verses[0]).trim()) &&
+                    verse.number <= Number(String(verses[1]).trim())
+                : verse.number === Number(String(verses[0]).trim());
+            });
           }
 
           this.$store.commit('setChapter', data);
