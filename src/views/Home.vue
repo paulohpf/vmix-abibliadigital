@@ -34,6 +34,7 @@
                       disabled
                       @click="
                         () => {
+                          showChapter(item);
                           $store.commit('updateActiveChapterList', index);
                         }
                       "
@@ -121,11 +122,27 @@ export default {
       return [];
     },
   },
-  updated() {
-    console.log(this);
-    // window.myAPI.saveBibleJson(this.bibleTable.selected);
+  methods: {
+    showChapter(chapter) {
+      if (window.myAPI && !chapter.active) {
+        const chapterFormatted = chapter.versesArr.verses.map(verse => {
+          const verseFormatted = verse;
+
+          verseFormatted.info = `${chapter.book.name} ${chapter.chapter}${
+            chapter.verses ? `:${chapter.verses}` : ``
+          }`;
+
+          verseFormatted.chapter = chapter.chapter;
+
+          return verseFormatted;
+        });
+
+        console.log(chapterFormatted);
+
+        window.myAPI.saveBibleJson(chapterFormatted);
+      }
+    },
   },
-  methods: {},
 };
 </script>
 

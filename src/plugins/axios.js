@@ -20,7 +20,7 @@ abibliadigital.interceptors.request.use(
     if (store.state.persistedData.aBibliaDigital.token) {
       const newConfig = config;
       newConfig.headers.Authorization = `Bearer ${store.state.persistedData.aBibliaDigital.token}`;
-      console.log(newConfig);
+      // console.log(newConfig);
       // return Promise.reject();
       return newConfig;
     }

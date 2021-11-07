@@ -38,7 +38,7 @@ async function createWindow() {
     mainWin.loadURL('app://./index.html');
   }
 
-  ipcMain.on('save-bible-json', ElectronProvider.handleSaveBibleJSON);
+  ipcMain.on('save-bible-json', ElectronProvider.handleBibleShowChapter);
 }
 
 // Quit when all windows are closed.

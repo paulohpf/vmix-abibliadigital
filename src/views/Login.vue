@@ -62,12 +62,8 @@ export default {
       passwordRules: [v => !!v || 'Senha é obrigatória'],
     },
   }),
-  mounted() {
-    console.log(this);
-  },
   methods: {
     submit() {
-      console.log('.');
       // aBibliaDigitalAPI.get(`/verses/${this.inputs.}/:abbrev/:chapter`)
       const validate = this.$refs.loginForm.validate();
       if (validate) console.log(this.inputs);
