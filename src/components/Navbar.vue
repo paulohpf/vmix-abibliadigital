@@ -151,7 +151,7 @@ export default {
       await this.getChapter();
 
       if (this.inputs.version && this.inputs.book.name && this.inputs.chapter) {
-        this.$store.commit('setChapterList', {
+        this.$store.commit('addChapterToList', {
           name: `${String(this.inputs.version).toUpperCase()} -
           ${this.inputs.book.name} ${this.inputs.chapter}
           ${this.inputs.verses ? `:${this.inputs.verses}` : ''}`,
@@ -160,6 +160,7 @@ export default {
           chapter: this.inputs.chapter,
           verses: this.inputs.verses,
           versesArr: this.$store.getters.getChapter,
+          active: false,
         });
       }
     },

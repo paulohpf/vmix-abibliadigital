@@ -22,10 +22,40 @@
         />
       </v-col>
       <v-col v-if="bibleTable.showList" cols="4">
-        <v-data-table
-          :headers="chapterListTable.headers"
-          :items="chapterList"
-        />
+        <v-data-table :headers="chapterListTable.headers" :items="chapterList">
+          <template #item="{ item, index }">
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>
+                <tr>
+                  <td>
+                    <v-simple-checkbox
+                      v-model="item.active"
+                      disabled
+                      @click="
+                        () => {
+                          $store.commit('updateActiveChapterList', index);
+                        }
+                      "
+                    />
+                  </td>
+                  <td>
+                    <v-btn
+                      icon
+                      @click="
+                        () => {
+                          $store.commit('removeChapterFromList', index);
+                        }
+                      "
+                    >
+                      <v-icon>{{ icons.mdiTrashCan }}</v-icon>
+                    </v-btn>
+                  </td>
+                </tr>
+              </td>
+            </tr>
+          </template>
+        </v-data-table>
       </v-col>
     </v-row>
     <div></div>
@@ -33,7 +63,7 @@
 </template>
 
 <script>
-import { mdiViewList, mdiViewListOutline } from '@mdi/js';
+import { mdiViewList, mdiViewListOutline, mdiTrashCan } from '@mdi/js';
 
 export default {
   components: {
@@ -43,6 +73,7 @@ export default {
     icons: {
       mdiViewList,
       mdiViewListOutline,
+      mdiTrashCan,
     },
     bibleTable: {
       singleSelect: false,
@@ -69,7 +100,7 @@ export default {
           value: 'name',
         },
         {
-          text: 'Ativo',
+          text: 'Ações',
           align: 'start',
           value: '',
         },
