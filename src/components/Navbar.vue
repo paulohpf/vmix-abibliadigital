@@ -82,10 +82,10 @@ export default {
       mdiPlusBox,
     },
     inputs: {
-      version: '',
-      book: '',
-      chapter: '',
-      verses: '',
+      version: null,
+      book: null,
+      chapter: null,
+      verses: null,
       rules: {
         verses: [
           v => {
@@ -150,24 +150,18 @@ export default {
     async addToList() {
       await this.getChapter();
 
-      this.$store.commit('setChapterList', {
-        name: `${String(this.inputs.version).toUpperCase()} - ${
-          this.inputs.book.name
-        } ${this.inputs.chapter} : ${this.inputs.verses}`,
-        version: this.inputs.version,
-        book: this.inputs.book,
-        chapter: this.inputs.chapter,
-        verses: this.inputs.verses,
-        versesArr: this.$store.getters.getChapter,
-      });
-      // if (this.inputs.version && this.inputs.book && this.inputs.chapter) {
-      //   console.log({
-      //     version: this.inputs.version,
-      //     book: this.inputs.book,
-      //     chapter: this.inputs.chapter,
-      //     verses: this.inputs.verses,
-      //   });
-      // }
+      if (this.inputs.version && this.inputs.book.name && this.inputs.chapter) {
+        this.$store.commit('setChapterList', {
+          name: `${String(this.inputs.version).toUpperCase()} -
+          ${this.inputs.book.name} ${this.inputs.chapter}
+          ${this.inputs.verses ? `:${this.inputs.verses}` : ''}`,
+          version: this.inputs.version,
+          book: this.inputs.book,
+          chapter: this.inputs.chapter,
+          verses: this.inputs.verses,
+          versesArr: this.$store.getters.getChapter,
+        });
+      }
     },
   },
 };
