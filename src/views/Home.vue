@@ -34,7 +34,7 @@
                       disabled
                       @click="
                         () => {
-                          showChapter(item);
+                          showChapter(JSON.stringify(item));
                           $store.commit('updateActiveChapterList', index);
                         }
                       "
@@ -123,23 +123,35 @@ export default {
     },
   },
   methods: {
-    showChapter(chapter) {
+    showChapter(chapterJSON) {
+      const chapter = JSON.parse(chapterJSON);
+
       if (window.myAPI && !chapter.active) {
-        const chapterFormatted = chapter.versesArr.verses.map(verse => {
-          const verseFormatted = verse;
+        const versesFormatted = [];
+        const versesUnformatted = chapter.versesArr.verses;
 
-          verseFormatted.info = `${chapter.book.name} ${chapter.chapter}${
-            chapter.verses ? `:${chapter.verses}` : ``
-          }`;
+        for (let i = 0; i < versesUnformatted.length; i += 1) {
+          const versesFormattedIndex = versesFormatted.length - 1;
 
-          verseFormatted.chapter = chapter.chapter;
+          if (
+            versesFormatted[versesFormattedIndex]?.text.length +
+              versesUnformatted[i].text.length <
+            342
+          ) {
+            versesFormatted[
+              versesFormattedIndex
+            ].text += `\n${versesUnformatted[i].number} ${versesUnformatted[i].text}`;
+          } else {
+            versesFormatted.push({
+              text: `${versesUnformatted[i].number} ${versesUnformatted[i].text}`,
+              info: `${chapter.book.name} ${chapter.chapter}${
+                chapter.verses ? `:${chapter.verses}` : ``
+              } (${String(chapter.version).toUpperCase()})`,
+            });
+          }
+        }
 
-          return verseFormatted;
-        });
-
-        console.log(chapterFormatted);
-
-        window.myAPI.saveBibleJson(chapterFormatted);
+        window.myAPI.saveBibleJson(versesFormatted);
       }
     },
   },

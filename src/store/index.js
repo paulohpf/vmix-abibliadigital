@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Vuex from 'vuex';
+import Vuex, { createLogger } from 'vuex';
 import createPersistedState from 'vuex-persistedstate';
 
 import bible from './bible';
@@ -18,5 +18,6 @@ export default new Vuex.Store({
     createPersistedState({
       paths: ['persistedData.aBibliaDigital', 'bible'],
     }),
+    createLogger(),
   ],
 });

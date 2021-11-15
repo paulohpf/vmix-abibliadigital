@@ -116,16 +116,13 @@ export default {
       return chapters;
     },
   },
-  // updated() {
-  //   console.log(this);
-  // },
   methods: {
     toUpper(text) {
       return String(text.version).toUpperCase();
     },
-    async getChapter() {
+    getChapter() {
       if (this.inputs.version && this.inputs.book && this.inputs.chapter) {
-        await BibliaDigitalProvider.getChapter(
+        return BibliaDigitalProvider.getChapter(
           this.inputs.version,
           this.inputs.book.abbrev.pt,
           this.inputs.chapter,
@@ -144,11 +141,13 @@ export default {
           }
 
           this.$store.commit('setChapter', data);
+          return data;
         });
       }
+      return null;
     },
     async addToList() {
-      await this.getChapter();
+      const versesArr = await this.getChapter();
 
       if (this.inputs.version && this.inputs.book.name && this.inputs.chapter) {
         this.$store.commit('addChapterToList', {
@@ -159,7 +158,7 @@ export default {
           book: this.inputs.book,
           chapter: this.inputs.chapter,
           verses: this.inputs.verses,
-          versesArr: this.$store.getters.getChapter,
+          versesArr,
           active: false,
         });
       }
