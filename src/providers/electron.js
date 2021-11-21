@@ -1,4 +1,5 @@
 /* eslint-disable class-methods-use-this */
+import { app } from 'electron';
 import path from 'path';
 
 const fs = require('fs');
@@ -9,7 +10,8 @@ class ElectronProver {
    */
   handleBibleShowChapter(event, data) {
     fs.writeFile(
-      path.join(__dirname, 'bible.json'),
+      // path.join(__dirname, '/bible.json'),
+      path.join(app.getAppPath(), '..', '..', 'bible.json'),
       JSON.stringify(data),
       err => {
         if (err) throw err;
