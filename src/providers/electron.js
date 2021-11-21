@@ -10,8 +10,9 @@ class ElectronProver {
    */
   handleBibleShowChapter(event, data) {
     fs.writeFile(
-      // path.join(__dirname, '/bible.json'),
-      path.join(app.getAppPath(), '..', '..', 'bible.json'),
+      process.env.node_env === 'production'
+        ? path.join(app.getAppPath(), '..', '..', 'bible.json')
+        : path.join(__dirname, 'bible.json'),
       JSON.stringify(data),
       err => {
         if (err) throw err;

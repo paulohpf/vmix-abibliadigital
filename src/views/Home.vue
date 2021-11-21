@@ -65,6 +65,7 @@
 
 <script>
 import { mdiViewList, mdiViewListOutline, mdiTrashCan } from '@mdi/js';
+import BibleJSON from '../providers/biblejson';
 
 export default {
   components: {
@@ -122,6 +123,9 @@ export default {
       return [];
     },
   },
+  mounted() {
+    this.getBooks();
+  },
   methods: {
     showChapter(chapterJSON) {
       const chapter = JSON.parse(chapterJSON);
@@ -153,6 +157,9 @@ export default {
 
         window.myAPI.saveBibleJson(versesFormatted);
       }
+    },
+    getBooks() {
+      console.log(BibleJSON.getBooks());
     },
   },
 };
