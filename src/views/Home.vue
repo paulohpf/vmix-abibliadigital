@@ -128,7 +128,7 @@ export default {
 
       if (window.myAPI && !chapter.active) {
         const versesFormatted = [];
-        const versesUnformatted = chapter.versesArr.verses;
+        const versesUnformatted = chapter.versesArr;
 
         for (let i = 0; i < versesUnformatted.length; i += 1) {
           const versesFormattedIndex = versesFormatted.length - 1;
