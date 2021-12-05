@@ -12,7 +12,7 @@
             v-model="inputs.version"
             name="version"
             :items="versions"
-            item-value="version"
+            item-value="abbrev"
             :item-text="toUpper"
             label="Versão"
             autocomplete="off"
@@ -24,7 +24,7 @@
             name="name"
             label="Livro"
             :items="books"
-            item-value="abbrev.pt"
+            item-value="abbrev"
             item-text="name"
             autocomplete="off"
             return-object
@@ -58,21 +58,22 @@
         <v-icon>{{ icons.mdiPlusBox }}</v-icon>
       </v-btn>
 
-      <Settings>
+      <!-- <Settings>
         <v-icon>{{ icons.mdiTools }}</v-icon>
-      </Settings>
+      </Settings> -->
     </v-app-bar>
   </nav>
 </template>
 
 <script>
 import { mdiMagnify, mdiFilter, mdiTools, mdiPlusBox } from '@mdi/js';
-import BibliaDigitalProvider from '@/providers/abibliadigital';
+// import BibliaDigitalProvider from '@/providers/abibliadigital';
+import BibleJSON from '../providers/biblejson';
 
 export default {
   name: 'Navbar',
   components: {
-    Settings: () => import('@/components/bible/Settings.vue'),
+    // Settings: () => import('@/components/bible/Settings.vue'),
   },
   data: () => ({
     icons: {
@@ -101,59 +102,79 @@ export default {
   }),
   computed: {
     versions() {
-      return this.$store.getters.getVersions;
+      return BibleJSON.getVersions();
     },
     books() {
-      return this.$store.getters.getBooks;
+      return BibleJSON.getBooks(this.inputs.version);
     },
     chapters() {
-      const chapters = [];
-      if (this.inputs.book) {
-        for (let i = 1; i <= this.inputs.book.chapters; i += 1) {
-          chapters.push(i);
-        }
-      }
-      return chapters;
+      return BibleJSON.getChapters(
+        this.inputs.version,
+        this.inputs.book?.abbrev,
+      );
     },
+  },
+  mounted() {},
+  updated() {
+    console.log(this.inputs);
+    console.log(this.versions);
+    console.log(this.books);
+    console.log(this.chapters);
+    console.log(this.inputs.book);
   },
   methods: {
     toUpper(text) {
-      return String(text.version).toUpperCase();
+      return text.name;
     },
     getChapter() {
-      if (this.inputs.version && this.inputs.book && this.inputs.chapter) {
-        return BibliaDigitalProvider.getChapter(
+      if (
+        this.inputs.version &&
+        this.inputs.book.abbrev &&
+        this.inputs.chapter
+      ) {
+        let chapter = BibleJSON.getChapter(
           this.inputs.version,
-          this.inputs.book.abbrev.pt,
+          this.inputs.book.abbrev,
           this.inputs.chapter,
-        ).then(res => {
-          const { data } = res;
+        );
 
-          if (this.inputs.verses) {
-            const verses = String(this.inputs.verses).split('-');
+        if (this.inputs.verses) {
+          const verses = String(this.inputs.verses).split('-');
 
-            data.verses = data.verses.filter(verse => {
-              return verse.number <= Number(String(verses[1]).trim())
-                ? verse.number >= Number(String(verses[0]).trim()) &&
-                    verse.number <= Number(String(verses[1]).trim())
-                : verse.number === Number(String(verses[0]).trim());
-            });
-          }
+          chapter = chapter.filter(verse => {
+            return verse.number <= Number(String(verses[1]).trim())
+              ? verse.number >= Number(String(verses[0]).trim()) &&
+                  verse.number <= Number(String(verses[1]).trim())
+              : verse.number === Number(String(verses[0]).trim());
+          });
+        }
 
-          this.$store.commit('setChapter', data);
-          return data;
-        });
+        console.log(chapter);
+        this.$store.commit('setChapter', chapter);
+
+        return chapter;
       }
+
       return null;
     },
-    async addToList() {
-      const versesArr = await this.getChapter();
+    addToList() {
+      this.getChapter();
+      const versesArr = this.$store.getters.getChapter;
 
-      if (this.inputs.version && this.inputs.book.name && this.inputs.chapter) {
+      console.log(versesArr);
+      console.log(
+        this.inputs.version && this.inputs.book.name && this.inputs.chapter,
+      );
+
+      if (
+        this.inputs.version &&
+        this.inputs.book?.name &&
+        this.inputs.chapter
+      ) {
         this.$store.commit('addChapterToList', {
           name: `${String(this.inputs.version).toUpperCase()} -
           ${this.inputs.book.name} ${this.inputs.chapter}
-          ${this.inputs.verses ? `:${this.inputs.verses}` : ''}`,
+          ${this.inputs.verses ? `: ${this.inputs.verses}` : ''}`,
           version: this.inputs.version,
           book: this.inputs.book,
           chapter: this.inputs.chapter,
