@@ -114,14 +114,6 @@ export default {
       );
     },
   },
-  mounted() {},
-  updated() {
-    console.log(this.inputs);
-    console.log(this.versions);
-    console.log(this.books);
-    console.log(this.chapters);
-    console.log(this.inputs.book);
-  },
   methods: {
     toUpper(text) {
       return text.name;
@@ -149,7 +141,6 @@ export default {
           });
         }
 
-        console.log(chapter);
         this.$store.commit('setChapter', chapter);
 
         return chapter;
@@ -160,11 +151,6 @@ export default {
     addToList() {
       this.getChapter();
       const versesArr = this.$store.getters.getChapter;
-
-      console.log(versesArr);
-      console.log(
-        this.inputs.version && this.inputs.book.name && this.inputs.chapter,
-      );
 
       if (
         this.inputs.version &&

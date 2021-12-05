@@ -8,17 +8,25 @@ class ElectronProver {
   /**
    * Salva o Versiculo para exibição externa em um arquivo JSON
    */
-  handleBibleShowChapter(event, data) {
-    fs.writeFile(
-      process.env.node_env === 'production'
+  handleBibleShowChapter(event, { data, nodeEnv }) {
+    const file =
+      nodeEnv === 'production'
         ? path.join(app.getAppPath(), '..', '..', 'bible.json')
-        : path.join(__dirname, 'bible.json'),
-      JSON.stringify(data),
-      err => {
+        : path.join(__dirname, 'bible.json');
+
+    const fileExist = fs.existsSync(file);
+
+    if (fileExist) {
+      fs.writeFile(file, JSON.stringify(data), err => {
         if (err) throw err;
         console.log('Data written to file');
-      },
-    );
+      });
+    } else {
+      fs.writeFile(file, JSON.stringify(data), { flag: 'wx' }, (err, data) => {
+        if (err) throw err;
+        console.log('Data written to file');
+      });
+    }
   }
 }
 

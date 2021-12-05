@@ -1,6 +1,8 @@
 {
   "name": "vmix-manager",
   "version": "0.1.0",
+  "author": "Paulo Henrique Palmeira Franco",
+  "description": "Criado para visualizar a biblia no vMIX",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",

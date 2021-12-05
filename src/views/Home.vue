@@ -151,7 +151,10 @@ export default {
           }
         }
 
-        window.myAPI.saveBibleJson(versesFormatted);
+        window.myAPI.saveBibleJson({
+          data: versesFormatted,
+          nodeEnv: process.env.NODE_ENV,
+        });
       }
     },
   },

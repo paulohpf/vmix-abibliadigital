@@ -65,8 +65,6 @@ export default {
   methods: {
     submit() {
       // aBibliaDigitalAPI.get(`/verses/${this.inputs.}/:abbrev/:chapter`)
-      const validate = this.$refs.loginForm.validate();
-      if (validate) console.log(this.inputs);
     },
   },
 };
