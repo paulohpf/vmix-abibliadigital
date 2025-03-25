@@ -22,6 +22,7 @@ module.exports = {
   rules: {
     'global-require': 0,
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    'vue/multi-word-component-names': 'off',
     'no-console':
       process.env.NODE_ENV === 'production'
         ? ['warn', { allow: ['error', 'warn'] }]
@@ -33,5 +34,6 @@ module.exports = {
       },
     ],
     'vue/no-unused-vars': 'error',
+    'class-methods-use-this': 'off',
   },
 };

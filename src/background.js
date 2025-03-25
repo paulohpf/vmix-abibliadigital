@@ -1,8 +1,7 @@
-import { app, protocol, BrowserWindow, contextBridge, ipcMain } from 'electron';
+import { app, protocol, BrowserWindow, ipcMain } from 'electron';
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer';
 import path from 'path';
-import ElectronProvider from '@/providers/electron';
+import { handleBibleShowChapter } from '@/providers/electron';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -35,10 +34,11 @@ async function createWindow() {
   } else {
     createProtocol('app');
     // Load the index.html when not in development
-    mainWin.loadURL('app://./index.html');
+    // mainWin.loadURL('app://./index.html');
+    mainWin.loadURL('http://localhost:3000');
   }
 
-  ipcMain.on('save-bible-json', ElectronProvider.handleBibleShowChapter);
+  ipcMain.on('save-bible-json', handleBibleShowChapter);
 }
 
 // Quit when all windows are closed.
@@ -60,14 +60,14 @@ app.on('activate', () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', async () => {
-  if (isDevelopment && !process.env.IS_TEST) {
-    // Install Vue Devtools
-    try {
-      await installExtension(VUEJS_DEVTOOLS);
-    } catch (e) {
-      console.error('Vue Devtools failed to install:', e.toString());
-    }
-  }
+  // if (isDevelopment && !process.env.IS_TEST) {
+  //   // Install Vue Devtools
+  //   try {
+  //     await installExtension(VUEJS_DEVTOOLS);
+  //   } catch (e) {
+  //     console.error('Vue Devtools failed to install:', e.toString());
+  //   }
+  // }
   createWindow();
 });
 
