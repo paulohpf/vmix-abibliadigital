@@ -1,4 +1,4 @@
-import { BibleState, Chapter } from './interfaces';
+import { BibleState, Chapter } from './interface';
 
 export default {
   state: (): BibleState => ({

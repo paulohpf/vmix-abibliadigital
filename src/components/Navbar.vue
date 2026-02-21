@@ -6,8 +6,8 @@
       elevate-on-scroll
       scroll-target="#versescontainer"
     >
-      <v-row>
-        <v-col>
+      <v-row dense align="center" class="flex-nowrap">
+        <v-col cols="12" md="3">
           <v-autocomplete
             v-model="inputs.version"
             name="version"
@@ -16,9 +16,12 @@
             :item-text="toUpper"
             label="Versão"
             autocomplete="off"
+            dense
+            hide-details="auto"
+            clearable
           />
         </v-col>
-        <v-col>
+        <v-col cols="12" md="3">
           <v-autocomplete
             v-model="inputs.book"
             name="name"
@@ -28,45 +31,86 @@
             item-text="name"
             autocomplete="off"
             return-object
+            dense
+            hide-details="auto"
+            clearable
+            :disabled="!inputs.version"
           />
         </v-col>
-        <v-col>
+        <v-col cols="12" md="2">
           <v-autocomplete
             v-model="inputs.chapter"
             name="chapter"
             :items="chapters"
             label="Capitulo"
             autocomplete="off"
+            dense
+            hide-details="auto"
+            clearable
+            :disabled="!inputs.book"
           />
         </v-col>
-        <v-col>
+        <v-col cols="12" md="2">
           <v-text-field
             v-model="inputs.verses"
             hint="Exemplo: 1-2"
             label="Versiculos"
             autocomplete="off"
             :rules="inputs.rules.verses"
+            dense
+            clearable
+            hide-details="auto"
+            :disabled="!inputs.chapter"
+            @keyup.enter="getChapter"
           />
         </v-col>
+        <v-col cols="12" md="2" class="d-flex justify-end">
+          <v-tooltip bottom>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                icon
+                :disabled="!canSearch"
+                v-bind="attrs"
+                v-on="on"
+                @click="getChapter"
+              >
+                <v-icon>{{ icons.mdiMagnify }}</v-icon>
+              </v-btn>
+            </template>
+            <span>Buscar capítulo selecionado</span>
+          </v-tooltip>
+
+          <v-tooltip bottom>
+            <template #activator="{ on, attrs }">
+              <v-btn
+                icon
+                :disabled="!canAdd"
+                v-bind="attrs"
+                v-on="on"
+                @click="addToList"
+              >
+                <v-icon>{{ icons.mdiPlusBox }}</v-icon>
+              </v-btn>
+            </template>
+            <span>Adicionar passagem na lista</span>
+          </v-tooltip>
+
+          <v-tooltip bottom>
+            <template #activator="{ on, attrs }">
+              <v-btn icon v-bind="attrs" v-on="on" @click="clearFilters">
+                <v-icon>{{ icons.mdiFilterOff }}</v-icon>
+              </v-btn>
+            </template>
+            <span>Limpar filtros e resultados</span>
+          </v-tooltip>
+        </v-col>
       </v-row>
-
-      <v-btn icon @click="() => getChapter()">
-        <v-icon>{{ icons.mdiMagnify }}</v-icon>
-      </v-btn>
-
-      <v-btn icon @click="() => addToList()">
-        <v-icon>{{ icons.mdiPlusBox }}</v-icon>
-      </v-btn>
-
-      <!-- <Settings>
-        <v-icon>{{ icons.mdiTools }}</v-icon>
-      </Settings> -->
     </v-app-bar>
   </nav>
 </template>
 
 <script>
-import { mdiMagnify, mdiFilter, mdiTools, mdiPlusBox } from '@mdi/js';
+import { mdiMagnify, mdiPlusBox, mdiFilterOff } from '@mdi/js';
 // import BibliaDigitalProvider from '@/providers/abibliadigital';
 import BibleJSON from '../providers/biblejson';
 
@@ -78,9 +122,8 @@ export default {
   data: () => ({
     icons: {
       mdiMagnify,
-      mdiFilter,
-      mdiTools,
       mdiPlusBox,
+      mdiFilterOff,
     },
     inputs: {
       version: null,
@@ -90,7 +133,12 @@ export default {
       rules: {
         verses: [
           v => {
+            if (!v) return true;
             const arr = String(v).split('-');
+
+            if (arr.length === 1) return true;
+
+            if (arr.length > 2) return 'Formato inválido';
 
             return Number(String(arr[0]).trim()) > Number(String(arr[1]).trim())
               ? 'Versiculo inicial maior que final'
@@ -101,6 +149,14 @@ export default {
     },
   }),
   computed: {
+    canSearch() {
+      return Boolean(
+        this.inputs.version && this.inputs.book?.abbrev && this.inputs.chapter,
+      );
+    },
+    canAdd() {
+      return this.canSearch;
+    },
     versions() {
       return BibleJSON.getVersions();
     },
@@ -118,12 +174,15 @@ export default {
     toUpper(text) {
       return text.name;
     },
+    clearFilters() {
+      this.inputs.version = null;
+      this.inputs.book = null;
+      this.inputs.chapter = null;
+      this.inputs.verses = null;
+      this.$store.commit('setChapter', []);
+    },
     getChapter() {
-      if (
-        this.inputs.version &&
-        this.inputs.book.abbrev &&
-        this.inputs.chapter
-      ) {
+      if (this.canSearch) {
         let chapter = BibleJSON.getChapter(
           this.inputs.version,
           this.inputs.book.abbrev,
@@ -149,6 +208,8 @@ export default {
       return null;
     },
     addToList() {
+      if (!this.canAdd) return;
+
       this.getChapter();
       const versesArr = this.$store.getters.getChapter;
 

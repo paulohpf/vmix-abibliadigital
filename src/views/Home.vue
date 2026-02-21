@@ -1,17 +1,31 @@
 <template>
-  <div class="home">
+  <div class="home pa-4">
     <Navbar />
-    <v-row
-      id="versescontainer"
-      class="overflow-y-auto"
-      style="max-height: calc(100vh - 80px)"
-    >
+    <v-row id="versescontainer" class="content-row overflow-y-auto">
       <v-col :cols="bibleTable.showList ? 8 : 12">
-        <v-btn icon @click="() => (bibleTable.showList = !bibleTable.showList)">
-          <v-icon>{{
-            bibleTable.showList ? icons.mdiViewList : icons.mdiViewListOutline
-          }}</v-icon>
-        </v-btn>
+        <div class="d-flex align-center justify-space-between mb-2">
+          <div>
+            <h3 class="mb-0">Versículos</h3>
+            <small class="text--secondary"
+              >{{ verses.length }} registro(s)</small
+            >
+          </div>
+          <v-btn
+            small
+            outlined
+            @click="bibleTable.showList = !bibleTable.showList"
+          >
+            <v-icon left>
+              {{
+                bibleTable.showList
+                  ? icons.mdiViewList
+                  : icons.mdiViewListOutline
+              }}
+            </v-icon>
+            {{ bibleTable.showList ? 'Ocultar Lista' : 'Mostrar Lista' }}
+          </v-btn>
+        </div>
+
         <v-data-table
           v-model="bibleTable.selected"
           :headers="bibleTable.headers"
@@ -19,47 +33,57 @@
           :single-select="bibleTable.singleSelect"
           item-key="number"
           show-select
+          dense
+          no-data-text="Selecione versão, livro e capítulo para carregar os versículos."
         />
       </v-col>
       <v-col v-if="bibleTable.showList" cols="4">
-        <v-data-table :headers="chapterListTable.headers" :items="chapterList">
+        <v-data-table
+          :headers="chapterListTable.headers"
+          :items="chapterList"
+          dense
+          no-data-text="Nenhuma passagem adicionada ainda."
+        >
           <template #item="{ item, index }">
             <tr>
-              <td>{{ item.name }}</td>
               <td>
-                <tr>
-                  <td>
-                    <v-simple-checkbox
-                      v-model="item.active"
-                      disabled
-                      @click="
-                        () => {
-                          showChapter(JSON.stringify(item));
-                          $store.commit('updateActiveChapterList', index);
-                        }
-                      "
-                    />
-                  </td>
-                  <td>
-                    <v-btn
-                      icon
-                      @click="
-                        () => {
-                          $store.commit('removeChapterFromList', index);
-                        }
-                      "
-                    >
-                      <v-icon>{{ icons.mdiTrashCan }}</v-icon>
-                    </v-btn>
-                  </td>
-                </tr>
+                <span class="chapter-name">{{ item.name }}</span>
+              </td>
+              <td>
+                <v-chip x-small :color="item.active ? 'success' : 'grey'" dark>
+                  {{ item.active ? 'Sim' : 'Não' }}
+                </v-chip>
+              </td>
+              <td>
+                <div class="d-flex align-center">
+                  <v-btn
+                    small
+                    text
+                    color="primary"
+                    @click="selectChapter(item, index)"
+                  >
+                    {{ item.active ? 'Ativo' : 'Exibir' }}
+                  </v-btn>
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        icon
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="$store.commit('removeChapterFromList', index)"
+                      >
+                        <v-icon small>{{ icons.mdiTrashCan }}</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Remover passagem da lista</span>
+                  </v-tooltip>
+                </div>
               </td>
             </tr>
           </template>
         </v-data-table>
       </v-col>
     </v-row>
-    <div></div>
   </div>
 </template>
 
@@ -101,9 +125,16 @@ export default {
           value: 'name',
         },
         {
+          text: 'Ativo',
+          align: 'start',
+          value: 'active',
+          width: 80,
+        },
+        {
           text: 'Ações',
           align: 'start',
-          value: '',
+          value: 'actions',
+          sortable: false,
         },
       ],
     },
@@ -123,9 +154,7 @@ export default {
     },
   },
   methods: {
-    showChapter(chapterJSON) {
-      const chapter = JSON.parse(chapterJSON);
-
+    selectChapter(chapter, index) {
       if (window.myAPI && !chapter.active) {
         const versesFormatted = [];
         const versesUnformatted = chapter.versesArr;
@@ -155,10 +184,19 @@ export default {
           data: versesFormatted,
           nodeEnv: process.env.NODE_ENV,
         });
+
+        this.$store.commit('updateActiveChapterList', index);
       }
     },
   },
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.content-row
+  max-height: calc(100vh - 110px)
+
+.chapter-name
+  display: inline-block
+  line-height: 1.3
+</style>
