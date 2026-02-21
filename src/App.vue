@@ -11,24 +11,27 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
+
 const defaultLayout = 'Default';
 
-export default {
+export default Vue.extend({
   name: 'App',
   components: { Loader: () => import('@/components/Loader.vue') },
   computed: {
-    layout() {
-      return `${this.$route.meta.layout || defaultLayout}Layout`;
+    layout(): string {
+      const layoutName = this.$route && this.$route.meta ? this.$route.meta.layout : defaultLayout;
+      return `${layoutName || defaultLayout}Layout`;
     },
-    bgImage() {
-      return this.$route.meta.backgroundImage;
+    bgImage(): unknown {
+      return this.$route && this.$route.meta ? this.$route.meta.backgroundImage : undefined;
     },
-    loader() {
+    loader(): boolean {
       return this.$store.getters.loaderActive;
     },
   },
-};
+});
 </script>
 
 <style lang="sass">

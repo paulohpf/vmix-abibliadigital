@@ -63,59 +63,104 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { mdiViewList, mdiViewListOutline, mdiTrashCan } from '@mdi/js';
 
-export default {
+interface Verse {
+  number: number;
+  text: string;
+}
+
+interface Chapter {
+  name: string;
+  version: string;
+  book: { name: string; abbrev: string };
+  chapter: number;
+  verses?: string;
+  versesArr: Verse[];
+  active: boolean;
+}
+
+interface TableHeader {
+  text: string;
+  align: string;
+  value: string;
+}
+
+interface BibleTableData {
+  singleSelect: boolean;
+  showList: boolean;
+  headers: TableHeader[];
+  selected: unknown[];
+}
+
+interface ChapterListTableData {
+  headers: TableHeader[];
+}
+
+interface HomeData {
+  icons: {
+    mdiViewList: string;
+    mdiViewListOutline: string;
+    mdiTrashCan: string;
+  };
+  bibleTable: BibleTableData;
+  chapterListTable: ChapterListTableData;
+}
+
+export default Vue.extend({
   components: {
     Navbar: () => import('@/components/Navbar.vue'),
   },
-  data: () => ({
-    icons: {
-      mdiViewList,
-      mdiViewListOutline,
-      mdiTrashCan,
-    },
-    bibleTable: {
-      singleSelect: false,
-      showList: false,
-      headers: [
-        {
-          text: 'Capitulo',
-          align: 'start',
-          value: 'number',
-        },
-        {
-          text: 'Texto',
-          align: 'start',
-          value: 'text',
-        },
-      ],
-      selected: [],
-    },
-    chapterListTable: {
-      headers: [
-        {
-          text: 'Versiculo',
-          align: 'start',
-          value: 'name',
-        },
-        {
-          text: 'Ações',
-          align: 'start',
-          value: '',
-        },
-      ],
-    },
-  }),
+  data(): HomeData {
+    return {
+      icons: {
+        mdiViewList,
+        mdiViewListOutline,
+        mdiTrashCan,
+      },
+      bibleTable: {
+        singleSelect: false,
+        showList: false,
+        headers: [
+          {
+            text: 'Capitulo',
+            align: 'start',
+            value: 'number',
+          },
+          {
+            text: 'Texto',
+            align: 'start',
+            value: 'text',
+          },
+        ],
+        selected: [],
+      },
+      chapterListTable: {
+        headers: [
+          {
+            text: 'Versiculo',
+            align: 'start',
+            value: 'name',
+          },
+          {
+            text: 'Ações',
+            align: 'start',
+            value: '',
+          },
+        ],
+      },
+    };
+  },
   computed: {
-    verses() {
+    verses(): Verse[] {
       if (this.$store.getters.getChapter) {
         return this.$store.getters.getChapter;
       }
       return [];
     },
-    chapterList() {
+    chapterList(): Chapter[] {
       if (this.$store.getters.getChapterList) {
         return this.$store.getters.getChapterList;
       }
@@ -123,42 +168,39 @@ export default {
     },
   },
   methods: {
-    showChapter(chapterJSON) {
-      const chapter = JSON.parse(chapterJSON);
+    showChapter(chapterJSON: string): void {
+      const chapter = JSON.parse(chapterJSON) as Chapter;
 
-      if (window.myAPI && !chapter.active) {
-        const versesFormatted = [];
+      if ((window as any).myAPI && !chapter.active) {
+        const versesFormatted: Array<{ text: string; info: string }> = [];
         const versesUnformatted = chapter.versesArr;
 
         for (let i = 0; i < versesUnformatted.length; i += 1) {
           const versesFormattedIndex = versesFormatted.length - 1;
 
-          if (
-            versesFormatted[versesFormattedIndex]?.text.length +
+          if (versesFormattedIndex >= 0 && versesFormatted[versesFormattedIndex] && versesFormatted[versesFormattedIndex].text.length +
               versesUnformatted[i].text.length <
             342
           ) {
-            versesFormatted[
-              versesFormattedIndex
-            ].text += `\n${versesUnformatted[i].number} ${versesUnformatted[i].text}`;
+            versesFormatted[versesFormattedIndex].text += `\n${versesUnformatted[i].number} ${versesUnformatted[i].text}`;
           } else {
             versesFormatted.push({
               text: `${versesUnformatted[i].number} ${versesUnformatted[i].text}`,
               info: `${chapter.book.name} ${chapter.chapter}${
-                chapter.verses ? `:${chapter.verses}` : ``
+                chapter.verses ? `:${chapter.verses}` : ''
               } (${String(chapter.version).toUpperCase()})`,
             });
           }
         }
 
-        window.myAPI.saveBibleJson({
+        (window as any).myAPI.saveBibleJson({
           data: versesFormatted,
           nodeEnv: process.env.NODE_ENV,
         });
       }
     },
   },
-};
+});
 </script>
 
 <style lang="sass" scoped></style>

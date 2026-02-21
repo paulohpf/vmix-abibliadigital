@@ -36,38 +36,64 @@
   </v-container>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { mdiEye, mdiEyeOff } from '@mdi/js';
-// import {abibliadigital as aBibliaDigitalAPI} from '@/providers/abibliadigital';
 
-export default {
+interface IconData {
+  mdiEye: string;
+  mdiEyeOff: string;
+}
+
+interface InputData {
+  email: string;
+  password: string;
+}
+
+interface ValidationRules {
+  emailRules: Array<(v: unknown) => boolean | string>;
+  passwordRules: Array<(v: unknown) => boolean | string>;
+}
+
+interface LoginData {
+  icons: IconData;
+  validLogin: boolean;
+  passwordShow: boolean;
+  stayConnected: boolean;
+  inputs: InputData;
+  rules: ValidationRules;
+}
+
+export default Vue.extend({
   name: 'Login',
-  data: () => ({
-    icons: {
-      mdiEye,
-      mdiEyeOff,
-    },
-    validLogin: true,
-    passwordShow: false,
-    stayConnected: false,
-    inputs: {
-      email: '',
-      password: '',
-    },
-    rules: {
-      emailRules: [
-        v => !!v || 'E-mail é obrigatório',
-        v => /.+@.+\..+/.test(v) || 'E-mail inválido',
-      ],
-      passwordRules: [v => !!v || 'Senha é obrigatória'],
-    },
-  }),
+  data(): LoginData {
+    return {
+      icons: {
+        mdiEye,
+        mdiEyeOff,
+      },
+      validLogin: true,
+      passwordShow: false,
+      stayConnected: false,
+      inputs: {
+        email: '',
+        password: '',
+      },
+      rules: {
+        emailRules: [
+          (v) => !!v || 'E-mail é obrigatório',
+          (v) => /.+@.+\..+/.test(String(v)) || 'E-mail inválido',
+        ],
+        passwordRules: [(v) => !!v || 'Senha é obrigatória'],
+      },
+    };
+  },
   methods: {
-    submit() {
+    submit(): void {
       // aBibliaDigitalAPI.get(`/verses/${this.inputs.}/:abbrev/:chapter`)
     },
   },
-};
+});
 </script>
 
 <style lang="sass" scoped>

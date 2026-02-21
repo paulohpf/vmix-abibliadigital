@@ -65,79 +65,113 @@
   </nav>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { mdiMagnify, mdiFilter, mdiTools, mdiPlusBox } from '@mdi/js';
-// import BibliaDigitalProvider from '@/providers/abibliadigital';
-import BibleJSON from '../providers/biblejson';
+import { BibleJSONProvider } from '../providers/biblejson';
 
-export default {
+interface BookInfo {
+  name: string;
+  abbrev: string;
+}
+
+interface VerseData {
+  number: number;
+  text: string;
+}
+
+interface NavbarData {
+  icons: {
+    mdiMagnify: string;
+    mdiFilter: string;
+    mdiTools: string;
+    mdiPlusBox: string;
+  };
+  inputs: {
+    version: string | null;
+    book: BookInfo | null;
+    chapter: string | number | null;
+    verses: string | null;
+    rules: {
+      verses: Array<(v: unknown) => boolean | string>;
+    };
+  };
+}
+
+export default Vue.extend({
   name: 'Navbar',
   components: {
     // Settings: () => import('@/components/bible/Settings.vue'),
   },
-  data: () => ({
-    icons: {
-      mdiMagnify,
-      mdiFilter,
-      mdiTools,
-      mdiPlusBox,
-    },
-    inputs: {
-      version: null,
-      book: null,
-      chapter: null,
-      verses: null,
-      rules: {
-        verses: [
-          v => {
-            const arr = String(v).split('-');
-
-            return Number(String(arr[0]).trim()) > Number(String(arr[1]).trim())
-              ? 'Versiculo inicial maior que final'
-              : true;
-          },
-        ],
+  data(): NavbarData {
+    return {
+      icons: {
+        mdiMagnify,
+        mdiFilter,
+        mdiTools,
+        mdiPlusBox,
       },
-    },
-  }),
+      inputs: {
+        version: null,
+        book: null,
+        chapter: null,
+        verses: null,
+        rules: {
+          verses: [
+            (v) => {
+              const arr = String(v).split('-');
+
+              return Number(String(arr[0]).trim()) > Number(String(arr[1]).trim())
+                ? 'Versiculo inicial maior que final'
+                : true;
+            },
+          ],
+        },
+      },
+    };
+  },
   computed: {
-    versions() {
-      return BibleJSON.getVersions();
+    versions(): Array<{ name: string; abbrev: string }> {
+      const bibleJSON = new BibleJSONProvider();
+      return bibleJSON.getVersions();
     },
-    books() {
-      return BibleJSON.getBooks(this.inputs.version);
+    books(): BookInfo[] {
+      const bibleJSON = new BibleJSONProvider();
+      return bibleJSON.getBooks(this.inputs.version) as BookInfo[];
     },
-    chapters() {
-      return BibleJSON.getChapters(
-        this.inputs.version,
-        this.inputs.book?.abbrev,
+    chapters(): number[] {
+      const bibleJSON = new BibleJSONProvider();
+      return bibleJSON.getChapters(
+        this.inputs.version || '',
+        this.inputs.book?.abbrev || '',
       );
     },
   },
   methods: {
-    toUpper(text) {
+    toUpper(text: { name: string }): string {
       return text.name;
     },
-    getChapter() {
+    getChapter(): VerseData[] | null {
       if (
         this.inputs.version &&
-        this.inputs.book.abbrev &&
+        this.inputs.book?.abbrev &&
         this.inputs.chapter
       ) {
-        let chapter = BibleJSON.getChapter(
+        const bibleJSON = new BibleJSONProvider();
+        let chapter = bibleJSON.getChapter(
           this.inputs.version,
           this.inputs.book.abbrev,
           this.inputs.chapter,
-        );
+        ) as VerseData[];
 
-        if (this.inputs.verses) {
+        if (this.inputs.verses && Array.isArray(chapter)) {
           const verses = String(this.inputs.verses).split('-');
 
-          chapter = chapter.filter(verse => {
-            return verse.number <= Number(String(verses[1]).trim())
-              ? verse.number >= Number(String(verses[0]).trim()) &&
-                  verse.number <= Number(String(verses[1]).trim())
-              : verse.number === Number(String(verses[0]).trim());
+          chapter = chapter.filter((verse) => {
+            const verseNum = verse.number;
+            const startVerse = Number(String(verses[0]).trim());
+            const endVerse = Number(String(verses[1]).trim());
+            return verseNum >= startVerse && verseNum <= endVerse;
           });
         }
 
@@ -148,7 +182,7 @@ export default {
 
       return null;
     },
-    addToList() {
+    addToList(): void {
       this.getChapter();
       const versesArr = this.$store.getters.getChapter;
 
@@ -158,9 +192,9 @@ export default {
         this.inputs.chapter
       ) {
         this.$store.commit('addChapterToList', {
-          name: `${String(this.inputs.version).toUpperCase()} -
-          ${this.inputs.book.name} ${this.inputs.chapter}
-          ${this.inputs.verses ? `: ${this.inputs.verses}` : ''}`,
+          name: `${String(this.inputs.version).toUpperCase()} - ${this.inputs.book.name} ${this.inputs.chapter}${
+            this.inputs.verses ? `: ${this.inputs.verses}` : ''
+          }`,
           version: this.inputs.version,
           book: this.inputs.book,
           chapter: this.inputs.chapter,
@@ -171,7 +205,7 @@ export default {
       }
     },
   },
-};
+});
 </script>
 
 <style lang="sass" scoped></style>

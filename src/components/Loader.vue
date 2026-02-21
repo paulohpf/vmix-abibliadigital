@@ -13,10 +13,12 @@
   </transition>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import Vue from 'vue';
+
+export default Vue.extend({
   name: 'Loader',
-};
+});
 </script>
 
 <style lang="sass" scoped>

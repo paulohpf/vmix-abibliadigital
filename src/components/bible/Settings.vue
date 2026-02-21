@@ -85,73 +85,110 @@
   </v-dialog>
 </template>
 
-<script>
+<script lang="ts">
+import Vue from 'vue';
 import { mdiClose, mdiEye, mdiEyeOff } from '@mdi/js';
 import BibliaDigitalProvider from '@/providers/abibliadigital';
 
-export default {
+interface IconData {
+  mdiClose: string;
+  mdiEye: string;
+  mdiEyeOff: string;
+}
+
+interface UserData {
+  email: string;
+  password: string | null;
+  passwordShow: boolean;
+}
+
+interface EmailRule {
+  (v: unknown): boolean | string;
+}
+
+interface ValidationRule {
+  emailRules: EmailRule[];
+  passwordRules: Array<(v: unknown) => boolean | string>;
+}
+
+interface SettingsData {
+  icons: IconData;
+  showDialog: boolean;
+  bibliaDigitalUserData: UserData;
+  rules: ValidationRule;
+}
+
+interface BibleUser {
+  email?: string;
+  name?: string;
+  token?: string;
+}
+
+export default Vue.extend({
   name: 'BibleSettings',
-  data: () => ({
-    icons: {
-      mdiClose,
-      mdiEye,
-      mdiEyeOff,
-    },
-    showDialog: false,
-    bibliaDigitalUserData: {
-      email: '',
-      password: null,
-      passwordShow: false,
-    },
-    rules: {
-      emailRules: [
-        v => !!v || 'E-mail é obrigatório',
-        v => /.+@.+\..+/.test(v) || 'E-mail inválido',
-      ],
-      passwordRules: [v => !!v || 'Senha é obrigatória'],
-    },
-  }),
+  data(): SettingsData {
+    return {
+      icons: {
+        mdiClose,
+        mdiEye,
+        mdiEyeOff,
+      },
+      showDialog: false,
+      bibliaDigitalUserData: {
+        email: '',
+        password: null,
+        passwordShow: false,
+      },
+      rules: {
+        emailRules: [
+          (v) => !!v || 'E-mail é obrigatório',
+          (v) => /.+@.+\..+/.test(String(v)) || 'E-mail inválido',
+        ],
+        passwordRules: [(v) => !!v || 'Senha é obrigatória'],
+      },
+    };
+  },
   computed: {
-    bibleUser() {
+    bibleUser(): BibleUser {
       return this.$store.getters.getBibliaDigitalUserData;
     },
   },
-  updated() {
-    // console.log(this);
-  },
-  mounted() {
-    if (this.bibleUser) {
+  mounted(): void {
+    if (this.bibleUser?.email) {
       this.bibliaDigitalUserData.email = this.bibleUser.email;
     }
   },
   methods: {
-    async saveUserABibliaDigital() {
+    async saveUserABibliaDigital(): Promise<void> {
       console.log(this.bibliaDigitalUserData);
       if (
         this.bibliaDigitalUserData.email &&
         this.bibliaDigitalUserData.password
       ) {
-        await BibliaDigitalProvider.updateToken({
-          email: this.bibliaDigitalUserData.email,
-          password: this.bibliaDigitalUserData.password,
-        }).then(res => {
-          if (res.data.msg === 'User not found') {
+        try {
+          const res = await BibliaDigitalProvider.updateToken({
+            email: this.bibliaDigitalUserData.email,
+            password: this.bibliaDigitalUserData.password,
+          });
+
+          if (res.data && (res.data as any).msg === 'User not found') {
             return;
           }
 
           this.$store.commit('setBibliaDigitalUserData', res.data);
-        });
 
-        await BibliaDigitalProvider.getVersions().then(res => {
-          this.$store.commit('setVersions', res.data);
-        });
-        await BibliaDigitalProvider.getBooks().then(res => {
-          this.$store.commit('setBooks', res.data);
-        });
+          const versionsRes = await BibliaDigitalProvider.getVersions();
+          this.$store.commit('setVersions', versionsRes.data);
+
+          const booksRes = await BibliaDigitalProvider.getBooks();
+          this.$store.commit('setBooks', booksRes.data);
+        } catch (error) {
+          console.error('Error saving user:', error);
+        }
       }
     },
   },
-};
+});
 </script>
 
 <style lang="sass" scoped></style>
