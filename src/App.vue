@@ -1,13 +1,13 @@
 <template>
   <div id="app">
-    <VMain>
-      <VApp>
+    <VApp>
+      <VMain>
         <Loader v-show="loader" />
         <component :is="layout">
           <router-view />
         </component>
-      </VApp>
-    </VMain>
+      </VMain>
+    </VApp>
   </div>
 </template>
 

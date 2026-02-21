@@ -1,9 +1,10 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import { AppRoutes } from './interface';
 
 Vue.use(VueRouter);
 
-const routes = [
+const routes: AppRoutes = [
   {
     path: '/',
     name: 'home',

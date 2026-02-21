@@ -1,7 +1,36 @@
 module.exports = {
+  chainWebpack: config => {
+    config.entry('app').clear().add('./src/main.ts');
+    config.resolve.extensions.add('.ts').add('.tsx');
+
+    // Disable eslint-loader for TypeScript files
+    config.module
+      .rule('eslint')
+      .exclude.add(/\.(ts|tsx)$/)
+      .end();
+
+    // Update babel-loader to process TypeScript
+    config.module
+      .rule('babel')
+      .test(/\.(js|jsx|ts|tsx)$/)
+      .exclude.add(/node_modules/)
+      .end();
+
+    config.module
+      .rule('ts')
+      .test(/\.tsx?$/)
+      .use('babel-loader')
+      .loader('babel-loader')
+      .end();
+  },
   pluginOptions: {
     electronBuilder: {
-      preload: 'src/electron/preload.js', // make sure you have this line added
+      mainProcessFile: 'src/background.js',
+      preload: 'src/electron/preload.js',
+      builderOptions: {
+        appId: 'com.paulohenrique.vmixbiblia.live',
+        productName: 'vMix Bíblia Live',
+      },
     },
   },
 };
