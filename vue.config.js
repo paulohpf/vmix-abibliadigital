@@ -27,6 +27,10 @@ module.exports = {
     electronBuilder: {
       mainProcessFile: 'src/background.js',
       preload: 'src/electron/preload.js',
+      builderOptions: {
+        appId: 'com.paulohenrique.vmixbiblia.live',
+        productName: 'vMix Bíblia Live',
+      },
     },
   },
 };

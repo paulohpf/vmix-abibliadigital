@@ -2,8 +2,8 @@
   <div class="home pa-4">
     <Navbar />
     <v-row id="versescontainer" class="content-row overflow-y-auto">
-      <v-col :cols="bibleTable.showList ? 8 : 12">
-        <div class="d-flex align-center justify-space-between mb-2">
+      <v-col cols="12" :md="bibleTable.showList ? 8 : 12">
+        <div class="d-flex align-center justify-space-between mb-2 header-row">
           <div>
             <h3 class="mb-0">Versículos</h3>
             <small class="text--secondary"
@@ -31,16 +31,20 @@
           :headers="bibleTable.headers"
           :items="verses"
           :single-select="bibleTable.singleSelect"
+          :items-per-page="bibleTable.itemsPerPage"
+          :footer-props="bibleTable.footerProps"
           item-key="number"
           show-select
           dense
           no-data-text="Selecione versão, livro e capítulo para carregar os versículos."
         />
       </v-col>
-      <v-col v-if="bibleTable.showList" cols="4">
+      <v-col v-if="bibleTable.showList" cols="12" md="4">
         <v-data-table
           :headers="chapterListTable.headers"
           :items="chapterList"
+          :items-per-page="chapterListTable.itemsPerPage"
+          :footer-props="chapterListTable.footerProps"
           dense
           no-data-text="Nenhuma passagem adicionada ainda."
         >
@@ -103,6 +107,13 @@ export default {
     bibleTable: {
       singleSelect: false,
       showList: false,
+      itemsPerPage: 25,
+      footerProps: {
+        'items-per-page-options': [10, 25, 50, 100],
+        'items-per-page-text': 'Linhas por página',
+        'page-text': (pageStart, pageStop, itemsLength) =>
+          `${pageStart}-${pageStop} de ${itemsLength}`,
+      },
       headers: [
         {
           text: 'Capitulo',
@@ -118,6 +129,13 @@ export default {
       selected: [],
     },
     chapterListTable: {
+      itemsPerPage: 10,
+      footerProps: {
+        'items-per-page-options': [5, 10, 20],
+        'items-per-page-text': 'Linhas por página',
+        'page-text': (pageStart, pageStop, itemsLength) =>
+          `${pageStart}-${pageStop} de ${itemsLength}`,
+      },
       headers: [
         {
           text: 'Versiculo',
@@ -199,4 +217,18 @@ export default {
 .chapter-name
   display: inline-block
   line-height: 1.3
+
+@media (max-width: 960px)
+  .home
+    padding: 8px !important
+
+  .content-row
+    max-height: calc(100vh - 210px)
+
+  .header-row
+    gap: 8px
+    align-items: flex-start !important
+
+  .chapter-name
+    white-space: normal
 </style>

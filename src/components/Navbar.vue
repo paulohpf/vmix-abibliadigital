@@ -1,13 +1,13 @@
 <template>
   <nav id="navbar" class="nav">
     <v-app-bar
-      height="80"
+      :height="$vuetify.breakpoint.mdAndUp ? 80 : 176"
       color="white"
       elevate-on-scroll
       scroll-target="#versescontainer"
     >
-      <v-row dense align="center" class="flex-nowrap">
-        <v-col cols="12" md="3">
+      <v-row dense align="center" class="flex-wrap">
+        <v-col cols="12" sm="6" md="3">
           <v-autocomplete
             v-model="inputs.version"
             name="version"
@@ -21,7 +21,8 @@
             clearable
           />
         </v-col>
-        <v-col cols="12" md="3">
+
+        <v-col cols="12" sm="6" md="3">
           <v-autocomplete
             v-model="inputs.book"
             name="name"
@@ -35,9 +36,11 @@
             hide-details="auto"
             clearable
             :disabled="!inputs.version"
+            :loading="loadingBooks"
           />
         </v-col>
-        <v-col cols="12" md="2">
+
+        <v-col cols="12" sm="6" md="2">
           <v-autocomplete
             v-model="inputs.chapter"
             name="chapter"
@@ -48,23 +51,32 @@
             hide-details="auto"
             clearable
             :disabled="!inputs.book"
+            :loading="loadingChapters"
           />
         </v-col>
-        <v-col cols="12" md="2">
+
+        <v-col cols="12" sm="6" md="2">
           <v-text-field
             v-model="inputs.verses"
-            hint="Exemplo: 1-2"
+            placeholder="Ex.: 5 ou 5-10"
+            :hint="versesHint"
             label="Versiculos"
             autocomplete="off"
             :rules="inputs.rules.verses"
             dense
             clearable
+            persistent-hint
             hide-details="auto"
             :disabled="!inputs.chapter"
             @keyup.enter="getChapter"
           />
         </v-col>
-        <v-col cols="12" md="2" class="d-flex justify-end">
+
+        <v-col
+          cols="12"
+          md="2"
+          class="d-flex justify-center justify-md-end action-buttons"
+        >
           <v-tooltip bottom>
             <template #activator="{ on, attrs }">
               <v-btn
@@ -125,6 +137,13 @@ export default {
       mdiPlusBox,
       mdiFilterOff,
     },
+    versions: BibleJSON.getVersions(),
+    books: [],
+    chapters: [],
+    loadingBooks: false,
+    loadingChapters: false,
+    loadingChapterVerses: false,
+    chapterVersesCount: null,
     inputs: {
       version: null,
       book: null,
@@ -157,17 +176,76 @@ export default {
     canAdd() {
       return this.canSearch;
     },
-    versions() {
-      return BibleJSON.getVersions();
+    versesHint() {
+      if (!this.inputs.chapter) {
+        return 'Filtre um versículo ou intervalo';
+      }
+
+      if (this.loadingChapterVerses) {
+        return 'Carregando quantidade de versículos...';
+      }
+
+      return this.chapterVersesCount !== null
+        ? `Capítulo com ${this.chapterVersesCount} versículo(s)`
+        : 'Filtre um versículo ou intervalo';
     },
-    books() {
-      return BibleJSON.getBooks(this.inputs.version);
+  },
+  watch: {
+    'inputs.version': {
+      handler: async function handleVersionChange(version) {
+        this.inputs.book = null;
+        this.inputs.chapter = null;
+        this.inputs.verses = null;
+        this.chapters = [];
+        this.chapterVersesCount = null;
+
+        if (!version) {
+          this.books = [];
+          return;
+        }
+
+        this.loadingBooks = true;
+        this.books = await BibleJSON.getBooks(version);
+        this.loadingBooks = false;
+      },
     },
-    chapters() {
-      return BibleJSON.getChapters(
-        this.inputs.version,
-        this.inputs.book?.abbrev,
-      );
+    'inputs.book': {
+      handler: async function handleBookChange(book) {
+        this.inputs.chapter = null;
+        this.inputs.verses = null;
+        this.chapterVersesCount = null;
+
+        if (!book?.abbrev || !this.inputs.version) {
+          this.chapters = [];
+          return;
+        }
+
+        this.loadingChapters = true;
+        this.chapters = await BibleJSON.getChapters(
+          this.inputs.version,
+          book.abbrev,
+        );
+        this.loadingChapters = false;
+      },
+    },
+    'inputs.chapter': {
+      handler: async function handleChapterChange(chapter) {
+        this.inputs.verses = null;
+        this.chapterVersesCount = null;
+
+        if (!chapter || !this.inputs.version || !this.inputs.book?.abbrev) {
+          return;
+        }
+
+        this.loadingChapterVerses = true;
+        const chapterData = await BibleJSON.getChapter(
+          this.inputs.version,
+          this.inputs.book.abbrev,
+          chapter,
+        );
+        this.chapterVersesCount = chapterData.length;
+        this.loadingChapterVerses = false;
+      },
     },
   },
   methods: {
@@ -179,11 +257,14 @@ export default {
       this.inputs.book = null;
       this.inputs.chapter = null;
       this.inputs.verses = null;
+      this.books = [];
+      this.chapters = [];
+      this.chapterVersesCount = null;
       this.$store.commit('setChapter', []);
     },
-    getChapter() {
+    async getChapter() {
       if (this.canSearch) {
-        let chapter = BibleJSON.getChapter(
+        let chapter = await BibleJSON.getChapter(
           this.inputs.version,
           this.inputs.book.abbrev,
           this.inputs.chapter,
@@ -207,10 +288,10 @@ export default {
 
       return null;
     },
-    addToList() {
+    async addToList() {
       if (!this.canAdd) return;
 
-      this.getChapter();
+      await this.getChapter();
       const versesArr = this.$store.getters.getChapter;
 
       if (
@@ -235,4 +316,12 @@ export default {
 };
 </script>
 
-<style lang="sass" scoped></style>
+<style lang="sass" scoped>
+.action-buttons
+  gap: 4px
+
+@media (max-width: 960px)
+  .nav
+    .v-toolbar__content
+      align-items: flex-start
+</style>

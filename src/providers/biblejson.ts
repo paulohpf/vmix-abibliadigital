@@ -1,46 +1,86 @@
-import bibleAA from '../assets/jsonbibles/AA.json';
-import bibleACF from '../assets/jsonbibles/ACF.json';
-import bibleNVI from '../assets/jsonbibles/NVI.json';
 import { BibleBook, BibleData, BibleVersion, ChapterVerse } from './interface';
 
 class BibleJSONProvider {
-  private bibles: BibleData[];
+  private bibleCache: Record<string, BibleData>;
+
+  private availableVersions: BibleVersion[];
+
+  private loaders: Record<string, () => Promise<{ default: BibleData }>>;
 
   constructor() {
-    this.bibles = [bibleAA as BibleData, bibleACF as BibleData, bibleNVI as BibleData];
+    this.bibleCache = {};
+    this.availableVersions = [
+      { name: 'Almeida Revisada Imprensa Bíblica', abbrev: 'AA' },
+      { name: 'Almeida Corrigida Fiel', abbrev: 'ACF' },
+      { name: 'Nova Versão Internacional', abbrev: 'NVI' },
+    ];
+
+    this.loaders = {
+      AA: () => import('../assets/jsonbibles/AA.json'),
+      ACF: () => import('../assets/jsonbibles/ACF.json'),
+      NVI: () => import('../assets/jsonbibles/NVI.json'),
+    };
   }
 
-  #filterBible(version: string): BibleData {
-    return this.bibles.filter(
-      (bible: BibleData) => bible.abbrev.toUpperCase() === version,
-    )[0];
+  async #getBible(version: string): Promise<BibleData | null> {
+    const normalizedVersion = String(version || '').toUpperCase();
+
+    if (!normalizedVersion) {
+      return null;
+    }
+
+    if (this.bibleCache[normalizedVersion]) {
+      return this.bibleCache[normalizedVersion];
+    }
+
+    const loader = this.loaders[normalizedVersion];
+
+    if (!loader) {
+      return null;
+    }
+
+    const module = await loader();
+    this.bibleCache[normalizedVersion] = module.default as BibleData;
+
+    return this.bibleCache[normalizedVersion];
   }
 
-  #filterBook(version: string, bookAbbrev: string): BibleBook {
-    return this.#filterBible(version).books.filter(
-      (book: BibleBook) => book.abbrev === bookAbbrev,
-    )[0];
+  async #filterBook(version: string, bookAbbrev: string): Promise<BibleBook | null> {
+    const bible = await this.#getBible(version);
+
+    if (!bible || !bookAbbrev) {
+      return null;
+    }
+
+    return (
+      bible.books.filter(
+        (book: BibleBook) => book.abbrev === bookAbbrev,
+      )[0] || null
+    );
   }
 
   getVersions(): BibleVersion[] {
-    return this.bibles.map((version: BibleData) => ({
-      name: version.name,
-      abbrev: version.abbrev,
-    }));
+    return this.availableVersions;
   }
 
-  getBooks(version: string): BibleVersion[] {
-    return version
-      ? this.#filterBible(version).books.map((book: BibleBook) => {
+  async getBooks(version: string): Promise<BibleVersion[]> {
+    const bible = await this.#getBible(version);
+
+    return bible
+      ? bible.books.map((book: BibleBook) => {
           return { name: book.name, abbrev: book.abbrev };
         })
       : [];
   }
 
-  getChapters(version: string, bookAbbrev: string): number[] {
+  async getChapters(version: string, bookAbbrev: string): Promise<number[]> {
     if (bookAbbrev) {
       const chapters: number[] = [];
-      const book = this.#filterBook(version, bookAbbrev);
+      const book = await this.#filterBook(version, bookAbbrev);
+
+      if (!book) {
+        return [];
+      }
 
       for (let i = 1; i <= book.chapters.length; i += 1) {
         chapters.push(i);
@@ -52,15 +92,21 @@ class BibleJSONProvider {
     return [];
   }
 
-  getChapter(version: string, bookAbbrev: string, chapter: number): ChapterVerse[] {
-    return chapter
-      ? this.#filterBook(version, bookAbbrev).chapters[chapter - 1].map(
-          (text: string, index: number) => ({
-            number: index + 1,
-            text,
-          }),
-        )
-      : [];
+  async getChapter(version: string, bookAbbrev: string, chapter: number): Promise<ChapterVerse[]> {
+    if (!chapter) {
+      return [];
+    }
+
+    const book = await this.#filterBook(version, bookAbbrev);
+
+    if (!book || !book.chapters[chapter - 1]) {
+      return [];
+    }
+
+    return book.chapters[chapter - 1].map((text: string, index: number) => ({
+      number: index + 1,
+      text,
+    }));
   }
 }
 

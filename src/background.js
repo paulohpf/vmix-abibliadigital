@@ -12,6 +12,17 @@ protocol.registerSchemesAsPrivileged([
 
 let mainWin;
 
+function isAllowedSender(event) {
+  const senderFrame = event && event.senderFrame ? event.senderFrame : null;
+  const senderUrl = String(senderFrame && senderFrame.url ? senderFrame.url : '');
+
+  return (
+    senderUrl.startsWith('app://') ||
+    senderUrl.startsWith('http://localhost') ||
+    senderUrl.startsWith('http://127.0.0.1')
+  );
+}
+
 async function createWindow() {
   mainWin = new BrowserWindow({
     width: 800,
@@ -31,7 +42,13 @@ async function createWindow() {
     mainWin.loadURL('app://./index.html');
   }
 
-  ipcMain.on('save-bible-json', ElectronProvider.handleBibleShowChapter);
+  ipcMain.on('save-bible-json', (event, payload) => {
+    if (!isAllowedSender(event)) {
+      return;
+    }
+
+    ElectronProvider.handleBibleShowChapter(event, payload);
+  });
 }
 
 app.on('window-all-closed', () => {

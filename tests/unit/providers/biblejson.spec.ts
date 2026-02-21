@@ -15,9 +15,9 @@ describe('providers/biblejson', () => {
     );
   });
 
-  it('retorna livros para versão válida e vazio para inválida', () => {
-    const books = bibleJsonProvider.getBooks('AA');
-    const empty = bibleJsonProvider.getBooks('');
+  it('retorna livros para versão válida e vazio para inválida', async () => {
+    const books = await bibleJsonProvider.getBooks('AA');
+    const empty = await bibleJsonProvider.getBooks('');
 
     expect(books.length).toBeGreaterThan(0);
     expect(books[0]).toEqual(
@@ -29,17 +29,17 @@ describe('providers/biblejson', () => {
     expect(empty).toEqual([]);
   });
 
-  it('retorna capítulos incrementais do livro', () => {
-    const chapters = bibleJsonProvider.getChapters('AA', 'gn');
+  it('retorna capítulos incrementais do livro', async () => {
+    const chapters = await bibleJsonProvider.getChapters('AA', 'gn');
 
     expect(chapters.length).toBeGreaterThan(0);
     expect(chapters[0]).toBe(1);
     expect(chapters[chapters.length - 1]).toBe(chapters.length);
   });
 
-  it('retorna versículos do capítulo e vazio para capítulo inválido', () => {
-    const verses = bibleJsonProvider.getChapter('AA', 'gn', 1);
-    const empty = bibleJsonProvider.getChapter('AA', 'gn', 0);
+  it('retorna versículos do capítulo e vazio para capítulo inválido', async () => {
+    const verses = await bibleJsonProvider.getChapter('AA', 'gn', 1);
+    const empty = await bibleJsonProvider.getChapter('AA', 'gn', 0);
 
     expect(verses.length).toBeGreaterThan(0);
     expect(verses[0]).toEqual(
