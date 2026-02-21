@@ -1,12 +1,13 @@
 <template>
   <nav id="navbar" class="nav">
     <v-app-bar
-      :height="$vuetify.breakpoint.mdAndUp ? 80 : 176"
+      :height="appBarHeight"
       color="white"
+      class="navbar-bar"
       elevate-on-scroll
       scroll-target="#versescontainer"
     >
-      <v-row dense align="center" class="flex-wrap">
+      <v-row dense align="start" class="flex-wrap controls-row">
         <v-col cols="12" sm="6" md="3">
           <v-autocomplete
             v-model="inputs.version"
@@ -116,13 +117,35 @@
             <span>Limpar filtros e resultados</span>
           </v-tooltip>
         </v-col>
+
+        <v-col
+          v-if="showHelpToggle"
+          cols="12"
+          class="d-flex d-md-none justify-center help-toggle-col"
+        >
+          <v-btn
+            x-small
+            text
+            color="primary"
+            class="help-toggle-btn"
+            @click="$emit('show-help')"
+          >
+            <v-icon left x-small>{{ icons.mdiHelpCircleOutline }}</v-icon>
+            Mostrar ajuda rápida
+          </v-btn>
+        </v-col>
       </v-row>
     </v-app-bar>
   </nav>
 </template>
 
 <script>
-import { mdiMagnify, mdiPlusBox, mdiFilterOff } from '@mdi/js';
+import {
+  mdiMagnify,
+  mdiPlusBox,
+  mdiFilterOff,
+  mdiHelpCircleOutline,
+} from '@mdi/js';
 // import BibliaDigitalProvider from '@/providers/abibliadigital';
 import BibleJSON from '../providers/biblejson';
 
@@ -131,11 +154,18 @@ export default {
   components: {
     // Settings: () => import('@/components/bible/Settings.vue'),
   },
+  props: {
+    showHelpToggle: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data: () => ({
     icons: {
       mdiMagnify,
       mdiPlusBox,
       mdiFilterOff,
+      mdiHelpCircleOutline,
     },
     versions: BibleJSON.getVersions(),
     books: [],
@@ -168,6 +198,14 @@ export default {
     },
   }),
   computed: {
+    appBarHeight() {
+      const extraHelpHeight =
+        this.showHelpToggle && this.$vuetify.breakpoint.smAndDown ? 28 : 0;
+
+      if (this.$vuetify.breakpoint.mdAndUp) return 108;
+      if (this.$vuetify.breakpoint.smOnly) return 196 + extraHelpHeight;
+      return 312 + extraHelpHeight;
+    },
     canSearch() {
       return Boolean(
         this.inputs.version && this.inputs.book?.abbrev && this.inputs.chapter,
@@ -317,11 +355,40 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+.nav
+  .v-toolbar__content
+    padding: 10px 14px !important
+
 .action-buttons
-  gap: 4px
+  gap: 8px
+  padding-top: 10px
+
+.help-toggle-col
+  margin-top: -2px
+
+.help-toggle-btn
+  max-width: 100%
 
 @media (max-width: 960px)
   .nav
     .v-toolbar__content
+      padding: 8px 10px !important
       align-items: flex-start
+
+  .action-buttons
+    padding-top: 4px
+
+@media (max-width: 600px)
+  .action-buttons
+    justify-content: space-around
+    width: 100%
+
+    .v-btn
+      min-width: 42px
+      min-height: 42px
+
+  .help-toggle-btn
+    .v-btn__content
+      white-space: normal
+      text-align: center
 </style>

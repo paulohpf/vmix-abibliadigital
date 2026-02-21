@@ -1,7 +1,47 @@
 <template>
   <div class="home pa-4">
-    <Navbar />
-    <v-row id="versescontainer" class="content-row overflow-y-auto">
+    <Navbar
+      :show-help-toggle="!showHelp && $vuetify.breakpoint.smAndDown"
+      @show-help="showHelpAgain"
+    />
+
+    <v-alert
+      v-if="showHelp"
+      class="mb-3"
+      border="left"
+      colored-border
+      type="info"
+      dense
+      text
+    >
+      <div class="d-flex align-center justify-space-between mb-1">
+        <strong>Ajuda rápida de operação</strong>
+        <v-btn small text @click="hideHelp">Ocultar ajuda</v-btn>
+      </div>
+      <div class="help-text">
+        1) Selecione <strong>Versão</strong>, <strong>Livro</strong> e
+        <strong>Capítulo</strong>.<br />
+        2) (Opcional) Filtre em <strong>Versículos</strong> usando
+        <strong>5</strong> ou <strong>5-10</strong>.<br />
+        3) Clique em <strong>Buscar</strong> para carregar o texto.<br />
+        4) Clique em <strong>Adicionar</strong> para enviar para a lista
+        operacional.<br />
+        5) Na lista, use <strong>Exibir</strong> para mostrar o texto na
+        transmissão.
+      </div>
+    </v-alert>
+
+    <div
+      v-else-if="$vuetify.breakpoint.mdAndUp"
+      class="mb-2 d-flex justify-end"
+    >
+      <v-btn small text color="primary" @click="showHelpAgain">
+        <v-icon left small>{{ icons.mdiHelpCircleOutline }}</v-icon>
+        Mostrar ajuda rápida
+      </v-btn>
+    </div>
+
+    <v-row id="versescontainer" class="content-row overflow-y-auto pt-1">
       <v-col cols="12" :md="bibleTable.showList ? 8 : 12">
         <div class="d-flex align-center justify-space-between mb-2 header-row">
           <div>
@@ -33,13 +73,14 @@
           :single-select="bibleTable.singleSelect"
           :items-per-page="bibleTable.itemsPerPage"
           :footer-props="bibleTable.footerProps"
+          :mobile-breakpoint="0"
           item-key="number"
           show-select
           dense
           no-data-text="Selecione versão, livro e capítulo para carregar os versículos."
         />
       </v-col>
-      <v-col v-if="bibleTable.showList" cols="12" md="4">
+      <v-col v-if="bibleTable.showList" ref="selectedList" cols="12" md="4">
         <v-data-table
           :headers="chapterListTable.headers"
           :items="chapterList"
@@ -88,11 +129,27 @@
         </v-data-table>
       </v-col>
     </v-row>
+
+    <v-btn
+      v-if="$vuetify.breakpoint.smAndDown"
+      color="primary"
+      small
+      class="mobile-list-fab"
+      @click="openSelectedList"
+    >
+      <v-icon left small>{{ icons.mdiViewList }}</v-icon>
+      Lista ({{ chapterList.length }})
+    </v-btn>
   </div>
 </template>
 
 <script>
-import { mdiViewList, mdiViewListOutline, mdiTrashCan } from '@mdi/js';
+import {
+  mdiViewList,
+  mdiViewListOutline,
+  mdiTrashCan,
+  mdiHelpCircleOutline,
+} from '@mdi/js';
 
 export default {
   components: {
@@ -103,7 +160,9 @@ export default {
       mdiViewList,
       mdiViewListOutline,
       mdiTrashCan,
+      mdiHelpCircleOutline,
     },
+    showHelp: true,
     bibleTable: {
       singleSelect: false,
       showList: false,
@@ -171,7 +230,32 @@ export default {
       return [];
     },
   },
+  created() {
+    const hiddenHelp = localStorage.getItem('vmix-biblia-live-hide-help');
+    this.showHelp = hiddenHelp !== 'true';
+  },
   methods: {
+    hideHelp() {
+      this.showHelp = false;
+      localStorage.setItem('vmix-biblia-live-hide-help', 'true');
+    },
+    showHelpAgain() {
+      this.showHelp = true;
+      localStorage.setItem('vmix-biblia-live-hide-help', 'false');
+    },
+    openSelectedList() {
+      this.bibleTable.showList = true;
+
+      this.$nextTick(() => {
+        const container = this.$el.querySelector('#versescontainer');
+        const selectedList =
+          this.$refs.selectedList?.$el || this.$refs.selectedList;
+
+        if (container && selectedList) {
+          container.scrollTop = selectedList.offsetTop - 8;
+        }
+      });
+    },
     selectChapter(chapter, index) {
       if (window.myAPI && !chapter.active) {
         const versesFormatted = [];
@@ -212,18 +296,21 @@ export default {
 
 <style lang="sass" scoped>
 .content-row
-  max-height: calc(100vh - 110px)
+  max-height: calc(100vh - 160px)
 
 .chapter-name
   display: inline-block
   line-height: 1.3
+
+.help-text
+  line-height: 1.45
 
 @media (max-width: 960px)
   .home
     padding: 8px !important
 
   .content-row
-    max-height: calc(100vh - 210px)
+    max-height: calc(100vh - 250px)
 
   .header-row
     gap: 8px
@@ -231,4 +318,14 @@ export default {
 
   .chapter-name
     white-space: normal
+
+@media (max-width: 600px)
+  .content-row
+    max-height: calc(100vh - 360px)
+
+  .mobile-list-fab
+    position: fixed
+    right: 12px
+    bottom: 12px
+    z-index: 12
 </style>
