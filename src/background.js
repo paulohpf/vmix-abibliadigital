@@ -10,9 +10,9 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } },
 ]);
 
-let mainWin: BrowserWindow | null = null;
+let mainWin;
 
-async function createWindow(): Promise<void> {
+async function createWindow() {
   mainWin = new BrowserWindow({
     width: 800,
     height: 600,
@@ -49,8 +49,7 @@ app.on('ready', async () => {
     try {
       await installExtension(VUEJS_DEVTOOLS);
     } catch (e) {
-      const error = e as Error;
-      console.error('Vue Devtools failed to install:', error.toString());
+      console.error('Vue Devtools failed to install:', e.toString());
     }
   }
   createWindow();
@@ -58,7 +57,7 @@ app.on('ready', async () => {
 
 if (isDevelopment) {
   if (process.platform === 'win32') {
-    process.on('message', (data: string) => {
+    process.on('message', data => {
       if (data === 'graceful-exit') {
         app.quit();
       }

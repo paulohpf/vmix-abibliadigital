@@ -26,7 +26,9 @@
     "vue-router": "^3.5.3",
     "vuetify": "^2.5.14",
     "vuex": "^3.6.2",
-    "vuex-persistedstate": "^4.1.0"
+    "vuex-persistedstate": "^4.1.0",
+    "vue-cli-plugin-electron-builder": "~2.1.1",
+    "electron-devtools-installer": "^3.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",
@@ -42,7 +44,6 @@
     "@vue/eslint-config-airbnb": "^5.3.0",
     "babel-jest": "27.5.1",
     "deepmerge": "^4.2.2",
-    "electron-devtools-installer": "^3.1.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
@@ -53,7 +54,6 @@
     "sass": "^1.43.4",
     "sass-loader": "10.1.1",
     "typescript": "^5.9.3",
-    "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-template-compiler": "^2.6.11"
   },
   "eslintConfig": {

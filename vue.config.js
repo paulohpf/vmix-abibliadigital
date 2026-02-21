@@ -25,8 +25,8 @@ module.exports = {
   },
   pluginOptions: {
     electronBuilder: {
-      mainProcessFile: 'src/background.ts',
-      preload: 'src/electron/preload.ts',
+      mainProcessFile: 'src/background.js',
+      preload: 'src/electron/preload.js',
     },
   },
 };

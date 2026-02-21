@@ -1,13 +1,11 @@
 /* eslint-disable class-methods-use-this */
 import { app } from 'electron';
 import path from 'path';
-import { SaveBibleJsonPayload } from './interface';
 
 const fs = require('fs');
 
 class ElectronProver {
-  handleBibleShowChapter(event: unknown, payload: SaveBibleJsonPayload): void {
-    const { data, nodeEnv } = payload;
+  handleBibleShowChapter(event, { data, nodeEnv }) {
     const file =
       nodeEnv === 'production'
         ? path.join(app.getAppPath(), '..', '..', 'bible.json')
@@ -16,18 +14,13 @@ class ElectronProver {
     const fileExist = fs.existsSync(file);
 
     if (fileExist) {
-      fs.writeFile(file, JSON.stringify(data), (err: NodeJS.ErrnoException | null) => {
+      fs.writeFile(file, JSON.stringify(data), err => {
         if (err) throw err;
       });
     } else {
-      fs.writeFile(
-        file,
-        JSON.stringify(data),
-        { flag: 'wx' },
-        (err: NodeJS.ErrnoException | null) => {
-          if (err) throw err;
-        },
-      );
+      fs.writeFile(file, JSON.stringify(data), { flag: 'wx' }, err => {
+        if (err) throw err;
+      });
     }
   }
 }
