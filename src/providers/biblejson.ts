@@ -1,45 +1,46 @@
 import bibleAA from '../assets/jsonbibles/AA.json';
 import bibleACF from '../assets/jsonbibles/ACF.json';
 import bibleNVI from '../assets/jsonbibles/NVI.json';
+import { BibleBook, BibleData, BibleVersion, ChapterVerse } from './interface';
 
 class BibleJSONProvider {
+  private bibles: BibleData[];
+
   constructor() {
-    this.bibles = [bibleAA, bibleACF, bibleNVI];
+    this.bibles = [bibleAA as BibleData, bibleACF as BibleData, bibleNVI as BibleData];
   }
 
-  #filterBible(version) {
+  #filterBible(version: string): BibleData {
     return this.bibles.filter(
-      bible => bible.abbrev.toUpperCase() === version,
+      (bible: BibleData) => bible.abbrev.toUpperCase() === version,
     )[0];
   }
 
-  #filterBook(version, bookAbbrev) {
+  #filterBook(version: string, bookAbbrev: string): BibleBook {
     return this.#filterBible(version).books.filter(
-      book => book.abbrev === bookAbbrev,
+      (book: BibleBook) => book.abbrev === bookAbbrev,
     )[0];
   }
 
-  getVersions() {
-    return this.bibles.map(version => ({
+  getVersions(): BibleVersion[] {
+    return this.bibles.map((version: BibleData) => ({
       name: version.name,
       abbrev: version.abbrev,
     }));
   }
 
-  getBooks(version) {
+  getBooks(version: string): BibleVersion[] {
     return version
-      ? this.#filterBible(version).books.map(book => {
+      ? this.#filterBible(version).books.map((book: BibleBook) => {
           return { name: book.name, abbrev: book.abbrev };
         })
       : [];
   }
 
-  getChapters(version, bookAbbrev) {
+  getChapters(version: string, bookAbbrev: string): number[] {
     if (bookAbbrev) {
-      const chapters = [];
+      const chapters: number[] = [];
       const book = this.#filterBook(version, bookAbbrev);
-
-      console.log(book.chapters.length);
 
       for (let i = 1; i <= book.chapters.length; i += 1) {
         chapters.push(i);
@@ -51,14 +52,10 @@ class BibleJSONProvider {
     return [];
   }
 
-  /**
-   * Return single chapter from book
-   */
-  getChapter(version, bookAbbrev, chapter) {
-    // const chapter = [];
+  getChapter(version: string, bookAbbrev: string, chapter: number): ChapterVerse[] {
     return chapter
       ? this.#filterBook(version, bookAbbrev).chapters[chapter - 1].map(
-          (text, index) => ({
+          (text: string, index: number) => ({
             number: index + 1,
             text,
           }),

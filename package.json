@@ -30,7 +30,10 @@
   "devDependencies": {
     "@babel/core": "^7.16.0",
     "@babel/eslint-parser": "^7.16.3",
+    "@babel/preset-typescript": "^7.28.5",
     "@mdi/font": "^5.9.55",
+    "@typescript-eslint/eslint-plugin": "6",
+    "@typescript-eslint/parser": "6",
     "@vue/cli-plugin-babel": "^4.5.15",
     "@vue/cli-plugin-eslint": "^4.5.15",
     "@vue/cli-service": "^4.5.15",
@@ -45,6 +48,7 @@
     "prettier": "^2.4.1",
     "sass": "^1.43.4",
     "sass-loader": "10.1.1",
+    "typescript": "^5.9.3",
     "vue-cli-plugin-electron-builder": "~2.1.1",
     "vue-template-compiler": "^2.6.11"
   },
@@ -60,6 +64,22 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts",
+          "**/*.tsx"
+        ],
+        "parser": "@typescript-eslint/parser",
+        "parserOptions": {
+          "ecmaVersion": 2020,
+          "sourceType": "module"
+        },
+        "extends": [
+          "plugin:@typescript-eslint/recommended"
+        ]
+      }
+    ],
     "rules": {}
   },
   "browserslist": [
