@@ -1,7 +1,7 @@
 {
   "name": "vmix-biblia-live",
   "productName": "vMix Bíblia Live",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "Paulo Henrique Palmeira Franco",
   "description": "Aplicativo para seleção e publicação de passagens bíblicas em transmissões ao vivo via arquivo JSON integrado ao fluxo de exibição.",
   "private": true,

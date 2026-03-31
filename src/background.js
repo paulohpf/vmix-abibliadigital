@@ -25,8 +25,10 @@ function isAllowedSender(event) {
 
 async function createWindow() {
   mainWin = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1280,
+    height: 800,
+    minWidth: 1024,
+    minHeight: 768,
     webPreferences: {
       preload: path.join(__dirname, '/preload.js'),
       nodeIntegration: false,
@@ -42,13 +44,16 @@ async function createWindow() {
     mainWin.loadURL('app://./index.html');
   }
 
-  ipcMain.on('save-bible-json', (event, payload) => {
+  const saveContentHandler = (event, payload) => {
     if (!isAllowedSender(event)) {
       return;
     }
 
     ElectronProvider.handleBibleShowChapter(event, payload);
-  });
+  };
+
+  ipcMain.on('save-bible-json', saveContentHandler);
+  ipcMain.on('save-content-json', saveContentHandler);
 }
 
 app.on('window-all-closed', () => {

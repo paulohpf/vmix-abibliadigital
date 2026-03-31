@@ -28,4 +28,5 @@ export interface ChapterVerse {
 export interface SaveBibleJsonPayload {
   data: unknown;
   nodeEnv?: 'development' | 'production' | string;
+  target?: 'bible' | 'quickText';
 }
