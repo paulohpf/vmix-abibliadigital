@@ -1,7 +1,10 @@
 import { ChapterVerse } from '@/providers/interface';
+import { ActionContext } from 'vuex';
 import {
   cloneOperationalContent,
   createDefaultQuickTextTemplate,
+  LegacyBibleState,
+  mergeLegacyBibleState,
   normalizeOperationalContentList,
   normalizeQuickTextItems,
   normalizeQuickTextTemplates,
@@ -16,6 +19,7 @@ import {
 } from './interface';
 
 const defaultTemplate = createDefaultQuickTextTemplate();
+type ContentActionContext = ActionContext<ContentState, unknown>;
 
 export default {
   state: (): ContentState => ({
@@ -26,6 +30,19 @@ export default {
   }),
   plugins: [],
   mutations: {
+    migrateLegacyBibleState(
+      state: ContentState,
+      legacyBibleState: LegacyBibleState | null | undefined,
+    ): void {
+      const migratedState = mergeLegacyBibleState({
+        existingContentList: state.contentList,
+        existingCurrentBibleChapter: state.currentBibleChapter,
+        legacyBibleState,
+      });
+
+      state.contentList = migratedState.contentList;
+      state.currentBibleChapter = migratedState.currentBibleChapter;
+    },
     hydrateLegacyContentState(state: ContentState): void {
       const normalizedTemplates = normalizeQuickTextTemplates(
         state.quickTextTemplates,
@@ -159,7 +176,13 @@ export default {
     },
   },
   actions: {
-    hydrateLegacyContentState({ commit }): void {
+    migrateLegacyBibleState(
+      { commit }: ContentActionContext,
+      legacyBibleState: LegacyBibleState | null | undefined,
+    ): void {
+      commit('migrateLegacyBibleState', legacyBibleState);
+    },
+    hydrateLegacyContentState({ commit }: ContentActionContext): void {
       commit('hydrateLegacyContentState');
     },
   },

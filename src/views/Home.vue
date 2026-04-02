@@ -209,9 +209,40 @@ export default {
   created() {
     const hiddenHelp = localStorage.getItem('vmix-biblia-live-hide-help');
     this.showHelp = this.resolveInitialHelpVisibility(hiddenHelp);
+    this.migrateLegacyBibleStateFromStorage();
     this.$store.dispatch('hydrateLegacyContentState');
   },
   methods: {
+    getPersistedStoreData() {
+      const rawPersistedData = localStorage.getItem('vuex');
+
+      if (!rawPersistedData) {
+        return null;
+      }
+
+      try {
+        const parsed = JSON.parse(rawPersistedData);
+        return parsed && typeof parsed === 'object' ? parsed : null;
+      } catch {
+        return null;
+      }
+    },
+    migrateLegacyBibleStateFromStorage() {
+      const markerKey = 'vmix-content-migration-v1';
+
+      if (localStorage.getItem(markerKey) === 'done') {
+        return;
+      }
+
+      const persistedData = this.getPersistedStoreData();
+
+      this.$store.dispatch(
+        'migrateLegacyBibleState',
+        persistedData && persistedData.bible ? persistedData.bible : null,
+      );
+
+      localStorage.setItem(markerKey, 'done');
+    },
     resolveInitialHelpVisibility(hiddenHelp) {
       if (hiddenHelp === 'true') return false;
       if (hiddenHelp === 'false') return true;

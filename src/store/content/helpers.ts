@@ -257,3 +257,183 @@ export function normalizeOperationalContentList(
     };
   });
 }
+
+export interface LegacyBibleState {
+  chapter?: unknown;
+  chapterList?: unknown;
+}
+
+interface MergeLegacyBibleStateParams {
+  existingContentList: OperationalContent[];
+  existingCurrentBibleChapter: ChapterVerse[];
+  legacyBibleState?: LegacyBibleState | null;
+}
+
+interface MergeLegacyBibleStateResult {
+  contentList: OperationalContent[];
+  currentBibleChapter: ChapterVerse[];
+}
+
+function normalizeLegacyChapterVerses(value: unknown): ChapterVerse[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter(item => {
+      return (
+        item &&
+        typeof item === 'object' &&
+        Number.isFinite((item as ChapterVerse).number) &&
+        typeof (item as ChapterVerse).text === 'string'
+      );
+    })
+    .map(item => ({
+      number: Number((item as ChapterVerse).number),
+      text: String((item as ChapterVerse).text),
+    }));
+}
+
+function buildLegacyBibleDedupeKey(content: BibleContent): string {
+  return [
+    'bible',
+    String(content.version || '').toLowerCase(),
+    String(content.book?.abbrev || '').toLowerCase(),
+    String(content.chapter),
+    String(content.verses || ''),
+  ].join('|');
+}
+
+function mapLegacyBibleListToContent(value: unknown): BibleContent[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map(item => {
+      if (!item || typeof item !== 'object') {
+        return null;
+      }
+
+      const version = String((item as BibleContent).version || '').trim();
+      const rawBook = (item as BibleContent).book;
+      const bookName = String(rawBook?.name || '').trim();
+      const bookAbbrev = String(rawBook?.abbrev || '').trim();
+      const chapter = Number((item as BibleContent).chapter);
+      const versesArr = normalizeLegacyChapterVerses(
+        (item as BibleContent).versesArr,
+      );
+
+      if (
+        !version ||
+        !bookName ||
+        !bookAbbrev ||
+        !Number.isFinite(chapter) ||
+        chapter <= 0
+      ) {
+        return null;
+      }
+
+      const normalizedVerses =
+        (item as BibleContent).verses === null ||
+        (item as BibleContent).verses === undefined
+          ? null
+          : String((item as BibleContent).verses).trim() || null;
+
+      const book = {
+        name: bookName,
+        abbrev: bookAbbrev,
+      };
+      const defaultName = `${version.toUpperCase()} - ${book.name} ${chapter}${
+        normalizedVerses ? `: ${normalizedVerses}` : ''
+      }`;
+
+      return {
+        id:
+          typeof (item as BibleContent).id === 'string' &&
+          (item as BibleContent).id.trim()
+            ? (item as BibleContent).id
+            : createId('legacy-bible'),
+        type: 'bible' as const,
+        name: String((item as BibleContent).name || '').trim() || defaultName,
+        version,
+        book,
+        chapter,
+        verses: normalizedVerses,
+        versesArr,
+        active: Boolean((item as BibleContent).active),
+        exportData: buildBibleExportData(versesArr, {
+          book,
+          chapter,
+          verses: normalizedVerses,
+          version,
+        }),
+      };
+    })
+    .filter(Boolean) as BibleContent[];
+}
+
+export function mergeLegacyBibleState({
+  existingContentList,
+  existingCurrentBibleChapter,
+  legacyBibleState,
+}: MergeLegacyBibleStateParams): MergeLegacyBibleStateResult {
+  const currentContentList = (existingContentList || []).filter(Boolean);
+  const existingIds = new Set(
+    currentContentList
+      .map(item => item.id)
+      .filter(id => typeof id === 'string' && id),
+  );
+  const existingBibleKeys = new Set(
+    currentContentList
+      .filter(item => item.type === 'bible')
+      .map(item => buildLegacyBibleDedupeKey(item as BibleContent)),
+  );
+
+  const legacyMapped = mapLegacyBibleListToContent(
+    legacyBibleState?.chapterList,
+  );
+  const hasActiveInCurrentList = currentContentList.some(item => item.active);
+  let activeAlreadyAssigned = hasActiveInCurrentList;
+
+  const mergedLegacyItems = legacyMapped.reduce((acc, item) => {
+    const dedupeKey = buildLegacyBibleDedupeKey(item);
+
+    if (existingBibleKeys.has(dedupeKey)) {
+      return acc;
+    }
+
+    existingBibleKeys.add(dedupeKey);
+
+    if (existingIds.has(item.id)) {
+      item = {
+        ...item,
+        id: createId('legacy-bible'),
+      };
+    }
+
+    existingIds.add(item.id);
+
+    if (activeAlreadyAssigned || !item.active) {
+      acc.push({
+        ...item,
+        active: false,
+      });
+      return acc;
+    }
+
+    activeAlreadyAssigned = true;
+    acc.push(item);
+    return acc;
+  }, [] as BibleContent[]);
+
+  const currentBibleChapter =
+    (existingCurrentBibleChapter || []).length > 0
+      ? existingCurrentBibleChapter
+      : normalizeLegacyChapterVerses(legacyBibleState?.chapter);
+
+  return {
+    contentList: [...currentContentList, ...mergedLegacyItems],
+    currentBibleChapter,
+  };
+}

@@ -216,12 +216,63 @@ describe('store/content', () => {
     contentModule.mutations.hydrateLegacyContentState(state);
 
     expect(state.quickTextTemplates[0].model).toBe('pastor-preletor');
-    expect(state.quickTextItems[0].exportData[0].model).toBe(
-      'pastor-preletor',
-    );
-    expect(state.contentList[0].exportData[0].model).toBe(
-      'pastor-preletor',
-    );
+    expect(state.quickTextItems[0].exportData[0].model).toBe('pastor-preletor');
+    expect(state.contentList[0].exportData[0].model).toBe('pastor-preletor');
+  });
+
+  it('migrateLegacyBibleState mescla lista antiga sem duplicar conteúdo já existente', () => {
+    const state = createState();
+    const existingBible = createBibleContent();
+
+    state.contentList = [existingBible];
+
+    contentModule.mutations.migrateLegacyBibleState(state, {
+      chapter: [{ number: 1, text: 'No princípio...' }],
+      chapterList: [
+        {
+          ...existingBible,
+          id: 'legacy-duplicated',
+        },
+        {
+          ...existingBible,
+          id: 'legacy-new',
+          name: 'NVI - João 3 : 17',
+          verses: '17',
+          versesArr: [{ number: 17, text: 'Porque Deus enviou seu Filho...' }],
+        },
+      ],
+    });
+
+    expect(state.contentList).toHaveLength(2);
+    expect(state.contentList[0].id).toBe('bible-1');
+    expect(state.contentList[1].id).toBe('legacy-new');
+    expect(state.currentBibleChapter).toEqual([
+      { number: 1, text: 'No princípio...' },
+    ]);
+  });
+
+  it('migrateLegacyBibleState preserva item ativo atual quando legado também está ativo', () => {
+    const state = createState();
+    const activeQuick = {
+      ...createQuickTextContent(),
+      active: true,
+    };
+
+    state.contentList = [activeQuick];
+
+    contentModule.mutations.migrateLegacyBibleState(state, {
+      chapterList: [
+        {
+          ...createBibleContent(),
+          id: 'legacy-active',
+          active: true,
+        },
+      ],
+    });
+
+    expect(state.contentList).toHaveLength(2);
+    expect(state.contentList[0].active).toBe(true);
+    expect(state.contentList[1].active).toBe(false);
   });
 
   it('upsertQuickTextItemInList adiciona e atualiza item rápido na fila', () => {
